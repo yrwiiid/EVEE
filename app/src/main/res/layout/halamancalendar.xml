@@ -4,6 +4,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#fff5e4"
     android:padding="16dp">
 
     <!-- Judul Halaman -->
@@ -12,6 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Kalender Menstruasi"
+        android:textColor="#850E35"
         android:textSize="20sp"
         android:textStyle="bold"
         android:layout_gravity="center_horizontal"

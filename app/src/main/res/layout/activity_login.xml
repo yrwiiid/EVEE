@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="#FFF5E4"
     android:orientation="vertical"
     android:padding="24dp">
 
@@ -20,20 +20,20 @@
         android:layout_gravity="center"
         android:layout_marginBottom="24dp"
         android:contentDescription="EVEE!"
-        app:srcCompat="@drawable/download" />
+        app:srcCompat="@drawable/logo__text_default" />
 
     <!-- Judul Login -->
+
+    <!-- Email Input -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginBottom="24dp"
-        android:text="Login EVEE!"
+        android:layout_marginBottom="0dp"
+        android:text="Login Ke Akunmu!"
         android:textColor="@color/black"
-        android:textSize="24sp"
+        android:textSize="15sp"
         android:textStyle="bold" />
 
-    <!-- Email Input -->
     <com.google.android.material.textfield.TextInputLayout
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
@@ -43,7 +43,7 @@
         app:boxBackgroundMode="outline"
         app:startIconContentDescription="Email icon"
         app:startIconDrawable="@drawable/baseline_email_24"
-        app:startIconTint="@color/black">
+        app:startIconTint="#850E35">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/editTextEmail"
@@ -64,7 +64,7 @@
         app:endIconMode="password_toggle"
         app:startIconContentDescription="Password icon"
         app:startIconDrawable="@drawable/baseline_lock_24"
-        app:startIconTint="@color/black">
+        app:startIconTint="#850E35">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/editTextPassword"
@@ -80,7 +80,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:backgroundTint="@color/black"
+        android:backgroundTint="#850E35"
         android:text="Login"
         android:textColor="@android:color/white"
         app:cornerRadius="12dp" />

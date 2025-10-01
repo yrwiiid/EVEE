@@ -1,9 +1,6 @@
 package com.example.evee;
 
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -11,46 +8,98 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 public class halamanmood extends Fragment {
 
-    private DatabaseReference dbRef;
+    private Button btnHappy, btnNeutral, btnSad;
+    private TextView txtMoodResult;
+
     private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.halamanmood, container, false);
 
-        Button btnHappy = view.findViewById(R.id.btnHappy);
-        Button btnNeutral = view.findViewById(R.id.btnNeutral);
-        Button btnSad = view.findViewById(R.id.btnSad);
-        TextView txtMoodResult = view.findViewById(R.id.txtMoodResult);
+        // Inisialisasi view
+        btnHappy = view.findViewById(R.id.btnHappy);
+        btnNeutral = view.findViewById(R.id.btnNeutral);
+        btnSad = view.findViewById(R.id.btnSad);
+        txtMoodResult = view.findViewById(R.id.txtMoodResult);
 
-        // Firebase
+        // Inisialisasi Firebase
         mAuth = FirebaseAuth.getInstance();
-        dbRef = FirebaseDatabase.getInstance().getReference("Users");
+        db = FirebaseFirestore.getInstance();
 
-        btnHappy.setOnClickListener(v -> saveMood("Senang 😊", txtMoodResult));
-        btnNeutral.setOnClickListener(v -> saveMood("Biasa saja 😐", txtMoodResult));
-        btnSad.setOnClickListener(v -> saveMood("Sedih 😢", txtMoodResult));
+        // Listener tombol
+        btnHappy.setOnClickListener(v -> saveMood("Senang 😊"));
+        btnNeutral.setOnClickListener(v -> saveMood("Biasa 😐"));
+        btnSad.setOnClickListener(v -> saveMood("Sedih 😢"));
+
+        // Saat halaman dibuka → langsung cek mood hari ini
+        loadTodayMood();
 
         return view;
     }
 
-    private void saveMood(String mood, TextView txtMoodResult) {
-        String uid = mAuth.getCurrentUser().getUid();
+    private void saveMood(String mood) {
+        String uid = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : null;
+        if (uid == null) {
+            Toast.makeText(getContext(), "User belum login", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        dbRef.child(uid).child("mood").setValue(mood)
-                .addOnSuccessListener(aVoid -> {
-                    txtMoodResult.setText("Mood kamu: " + mood);
-                    Toast.makeText(getActivity(), "Mood berhasil disimpan", Toast.LENGTH_SHORT).show();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getActivity(), "Gagal simpan mood", Toast.LENGTH_SHORT).show();
-                });
+        // Format tanggal hari ini
+        String today = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
+
+        // Data disimpan ke Firestore
+        Map<String, Object> moodData = new HashMap<>();
+        moodData.put("date", today);
+        moodData.put("mood", mood);
+
+        DocumentReference docRef = db.collection("Users")
+                .document(uid)
+                .collection("Mood")
+                .document(today);
+
+        docRef.set(moodData).addOnSuccessListener(aVoid -> {
+            txtMoodResult.setText("Mood kamu: " + mood);
+            Toast.makeText(getContext(), "Mood tersimpan", Toast.LENGTH_SHORT).show();
+        }).addOnFailureListener(e -> {
+            Toast.makeText(getContext(), "Gagal menyimpan: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    private void loadTodayMood() {
+        String uid = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : null;
+        if (uid == null) return;
+
+        String today = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
+
+        DocumentReference docRef = db.collection("Users")
+                .document(uid)
+                .collection("Mood")
+                .document(today);
+
+        docRef.get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                String mood = documentSnapshot.getString("mood");
+                txtMoodResult.setText("Mood kamu: " + mood);
+            }
+        });
     }
 }
