@@ -58,7 +58,7 @@ public class halamancalendar extends Fragment {
         mAuth = FirebaseAuth.getInstance();
         dbRef = FirebaseDatabase.getInstance().getReference("Users");
 
-        // restore siklus sebelumnya
+        // restore semua riwayat siklus
         restoreSavedCycle();
 
         // klik tanggal
@@ -66,43 +66,39 @@ public class halamancalendar extends Fragment {
             if (!selected) return;
 
             if (startDate == null) {
-                // klik pertama = start
+                // klik pertama
                 startDate = date;
                 endDate = null;
                 selectedRange.clear();
-                calendarView.removeDecorators();
                 textSelectedRange.setText("Mulai: " + formatDate(startDate));
             } else {
-                // klik kedua = end
+                // klik kedua
                 endDate = date;
 
-                // ✅ FIX: kalau tanggal sama → 1 hari saja
+                // jika sama → 1 hari
                 if (startDate.equals(endDate)) {
                     selectedRange.clear();
                     selectedRange.add(startDate);
 
                     textSelectedRange.setText("Haid: " + formatDate(startDate));
-                    calendarView.removeDecorators();
-                    calendarView.addDecorator(new RangeCircleDecorator(selectedRange, requireContext()));
-
                     startDate = null;
                     endDate = null;
-                    return; // stop di sini
+                    return;
                 }
 
-                // pastikan urutan start <= end
-                Calendar startCal = (Calendar) startDate.getDate().clone();
-                Calendar endCal = (Calendar) endDate.getDate().clone();
+                // pastikan urut
+                Calendar startCal = (Calendar) startDate.getCalendar().clone();
+                Calendar endCal = (Calendar) endDate.getCalendar().clone();
                 if (startCal.after(endCal)) {
                     CalendarDay tmp = startDate;
                     startDate = endDate;
                     endDate = tmp;
 
-                    startCal = (Calendar) startDate.getDate().clone();
-                    endCal = (Calendar) endDate.getDate().clone();
+                    startCal = (Calendar) startDate.getCalendar().clone();
+                    endCal = (Calendar) endDate.getCalendar().clone();
                 }
 
-                // build range
+                // buat range
                 selectedRange.clear();
                 Calendar iter = (Calendar) startCal.clone();
                 while (!iter.after(endCal)) {
@@ -111,9 +107,6 @@ public class halamancalendar extends Fragment {
                 }
 
                 textSelectedRange.setText("Haid: " + formatDate(startDate) + " - " + formatDate(endDate));
-                calendarView.removeDecorators();
-                calendarView.addDecorator(new RangeCircleDecorator(selectedRange, requireContext()));
-
                 startDate = null;
                 endDate = null;
             }
@@ -135,15 +128,20 @@ public class halamancalendar extends Fragment {
             String start = formatDate(selectedRange.get(0));
             String end = formatDate(selectedRange.get(selectedRange.size() - 1));
 
-            dbRef.child(uid).child("cycle").child("startDate").setValue(start);
-            dbRef.child(uid).child("cycle").child("endDate").setValue(end)
-                    .addOnSuccessListener(aVoid -> {
-                        textSelectedRange.setText("Haid: " + start + " - " + end + " ✅ Disimpan");
-                        Toast.makeText(requireContext(), "Data siklus tersimpan", Toast.LENGTH_SHORT).show();
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(requireContext(), "Gagal simpan: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
+            // simpan ke riwayat (push)
+            String cycleId = dbRef.child(uid).child("cycles").push().getKey();
+            if (cycleId != null) {
+                dbRef.child(uid).child("cycles").child(cycleId).child("startDate").setValue(start);
+                dbRef.child(uid).child("cycles").child(cycleId).child("endDate").setValue(end)
+                        .addOnSuccessListener(aVoid -> {
+                            textSelectedRange.setText("Haid: " + start + " - " + end + " ✅ Disimpan");
+                            Toast.makeText(requireContext(), "Data siklus tersimpan", Toast.LENGTH_SHORT).show();
+                            restoreSavedCycle(); // refresh kalender
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(requireContext(), "Gagal simpan: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        });
+            }
         });
 
         return view;
@@ -153,52 +151,88 @@ public class halamancalendar extends Fragment {
         if (mAuth.getCurrentUser() == null) return;
         String uid = mAuth.getCurrentUser().getUid();
 
-        dbRef.child(uid).child("cycle").addListenerForSingleValueEvent(new ValueEventListener() {
+        dbRef.child(uid).child("cycles").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (!snapshot.exists()) return;
 
-                String startStr = snapshot.child("startDate").getValue(String.class);
-                String endStr = snapshot.child("endDate").getValue(String.class);
-                if (startStr == null || endStr == null) return;
+                calendarView.removeDecorators(); // hapus dekorasi lama
+                List<CalendarDay> lastCycleRange = new ArrayList<>();
+                Date lastStartDt = null;
+                Date lastEndDt = null;
 
-                try {
-                    Date startDt = SDF.parse(startStr);
-                    Date endDt = SDF.parse(endStr);
-                    if (startDt == null || endDt == null) return;
+                for (DataSnapshot cycleSnap : snapshot.getChildren()) {
+                    String startStr = cycleSnap.child("startDate").getValue(String.class);
+                    String endStr = cycleSnap.child("endDate").getValue(String.class);
+                    if (startStr == null || endStr == null) continue;
 
-                    Calendar startCal = Calendar.getInstance();
-                    startCal.setTime(startDt);
-                    Calendar endCal = Calendar.getInstance();
-                    endCal.setTime(endDt);
+                    try {
+                        Date startDt = SDF.parse(startStr);
+                        Date endDt = SDF.parse(endStr);
+                        if (startDt == null || endDt == null) continue;
 
-                    selectedRange.clear();
-                    Calendar iter = (Calendar) startCal.clone();
-                    while (!iter.after(endCal)) {
-                        selectedRange.add(CalendarDay.from(iter));
-                        iter.add(Calendar.DAY_OF_MONTH, 1);
+                        Calendar startCal = Calendar.getInstance();
+                        startCal.setTime(startDt);
+                        Calendar endCal = Calendar.getInstance();
+                        endCal.setTime(endDt);
+
+                        List<CalendarDay> range = new ArrayList<>();
+                        Calendar iter = (Calendar) startCal.clone();
+                        while (!iter.after(endCal)) {
+                            range.add(CalendarDay.from(iter));
+                            iter.add(Calendar.DAY_OF_MONTH, 1);
+                        }
+
+                        // dekorasi siklus tersimpan
+                        calendarView.addDecorator(new RangeCircleDecorator(range, requireContext()));
+
+                        // simpan siklus terakhir untuk prediksi
+                        lastCycleRange = range;
+                        lastStartDt = startDt;
+                        lastEndDt = endDt;
+
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                // buat prediksi dari siklus terakhir
+                if (lastStartDt != null && lastEndDt != null) {
+                    long diff = (lastEndDt.getTime() - lastStartDt.getTime()) / (1000 * 60 * 60 * 24);
+                    int periodLength = (int) diff + 1; // durasi haid
+                    int cycleLength = 28; // asumsi siklus normal
+
+                    Calendar nextStart = Calendar.getInstance();
+                    nextStart.setTime(lastStartDt);
+                    nextStart.add(Calendar.DAY_OF_MONTH, cycleLength);
+
+                    Calendar nextEnd = (Calendar) nextStart.clone();
+                    nextEnd.add(Calendar.DAY_OF_MONTH, periodLength - 1);
+
+                    List<CalendarDay> predictedRange = new ArrayList<>();
+                    Calendar iter2 = (Calendar) nextStart.clone();
+                    while (!iter2.after(nextEnd)) {
+                        predictedRange.add(CalendarDay.from(iter2));
+                        iter2.add(Calendar.DAY_OF_MONTH, 1);
                     }
 
-                    calendarView.removeDecorators();
-                    calendarView.addDecorator(new RangeCircleDecorator(selectedRange, requireContext()));
-                    textSelectedRange.setText("Haid tersimpan: " + startStr + " - " + endStr);
-
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    textSelectedRange.setText("Data siklus tidak valid");
+                    // tambahkan dekorasi prediksi
+                    calendarView.addDecorator(new RangeCircleDecoratorPrediksi(predictedRange, requireContext()));
                 }
+
+                textSelectedRange.setText("Riwayat & prediksi siklus ditampilkan ✅");
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-            }
+            public void onCancelled(@NonNull DatabaseError error) {}
         });
     }
 
     private String formatDate(CalendarDay day) {
-        return SDF.format(day.getDate().getTime());
+        return SDF.format(day.getCalendar().getTime());
     }
 
+    // Dekorasi siklus tersimpan (merah)
     public static class RangeCircleDecorator implements DayViewDecorator {
         private final List<CalendarDay> dates;
         private final Drawable highlightDrawable;
@@ -206,6 +240,29 @@ public class halamancalendar extends Fragment {
         public RangeCircleDecorator(List<CalendarDay> dates, android.content.Context context) {
             this.dates = new ArrayList<>(dates);
             this.highlightDrawable = ContextCompat.getDrawable(context, R.drawable.circle_red);
+        }
+
+        @Override
+        public boolean shouldDecorate(CalendarDay day) {
+            return dates.contains(day);
+        }
+
+        @Override
+        public void decorate(DayViewFacade view) {
+            if (highlightDrawable != null) {
+                view.setBackgroundDrawable(highlightDrawable);
+            }
+        }
+    }
+
+    // Dekorasi prediksi (pink)
+    public static class RangeCircleDecoratorPrediksi implements DayViewDecorator {
+        private final List<CalendarDay> dates;
+        private final Drawable highlightDrawable;
+
+        public RangeCircleDecoratorPrediksi(List<CalendarDay> dates, android.content.Context context) {
+            this.dates = new ArrayList<>(dates);
+            this.highlightDrawable = ContextCompat.getDrawable(context, R.drawable.circle_pink);
         }
 
         @Override

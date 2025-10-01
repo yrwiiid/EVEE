@@ -18,7 +18,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/white"
-        app:itemIconTint="@color/black"
+        app:itemIconTint="#850E35"
         app:itemTextColor="@color/black"
         app:menu="@menu/icon_menu" />
 

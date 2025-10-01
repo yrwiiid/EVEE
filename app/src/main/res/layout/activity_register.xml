@@ -4,6 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FFF5E4"
     android:fitsSystemWindows="true">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -16,7 +17,7 @@
         android:layout_height="match_parent"
         android:layout_marginTop="?attr/actionBarSize"
         android:fillViewport="true"
-        android:background="#FFFFFF">
+        android:background="#FFF5E4">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -32,7 +33,7 @@
                 android:layout_height="120dp"
                 android:layout_marginBottom="24dp"
                 android:contentDescription="@string/app_name"
-                app:srcCompat="@drawable/download" />
+                app:srcCompat="@drawable/logo__text_default" />
 
             <!-- Nama -->
             <com.google.android.material.textfield.TextInputLayout
@@ -44,7 +45,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:boxBackgroundMode="outline"
                 app:startIconDrawable="@drawable/baseline_person_24"
-                app:startIconTint="@color/black">
+                app:startIconTint="#850E35">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editTextName"
@@ -65,7 +66,7 @@
                 app:boxBackgroundMode="outline"
                 app:startIconDrawable="@drawable/baseline_email_24"
                 app:startIconContentDescription="Email icon"
-                app:startIconTint="@color/black">
+                app:startIconTint="#850E35">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editTextEmail"
@@ -85,7 +86,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:boxBackgroundMode="outline"
                 app:startIconDrawable="@drawable/baseline_lock_24"
-                app:startIconTint="@color/black">
+                app:startIconTint="#850E35">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editTextPassword"
@@ -105,7 +106,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:boxBackgroundMode="outline"
                 app:startIconDrawable="@drawable/baseline_lock_24"
-                app:startIconTint="@color/black">
+                app:startIconTint="#850E35">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editTextConfirmPassword"
@@ -123,7 +124,7 @@
                 android:layout_marginTop="8dp"
                 android:textColor="@android:color/white"
                 app:cornerRadius="12dp"
-                android:backgroundTint="@color/black" />
+                android:backgroundTint="#850E35" />
 
             <!-- Login Redirect -->
             <TextView
