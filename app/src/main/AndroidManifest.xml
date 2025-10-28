@@ -6,13 +6,16 @@
         android:theme="@style/Theme.EVEE"
         android:allowBackup="true"
         android:label="EVEE"
-        android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:icon="@drawable/logo_red"
+        android:roundIcon="@drawable/logo_red"
         android:supportsRtl="true"
         >
 
         <!-- Main Activity -->
         <activity android:name=".dashboard" />
+
+        <!-- login activity -->
+        <activity android:name=".loginactivity"/>
 
         <!-- Register Activity -->
         <activity android:name=".registeractivity" />
@@ -22,7 +25,7 @@
 
         <!-- Login Activity: entry point -->
         <activity
-            android:name=".loginactivity"
+            android:name=".splashscreen"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

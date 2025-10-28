@@ -1,16 +1,24 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+
+    <!-- Tema utama aplikasi -->
     <style name="Theme.EVEE" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_500</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
-        <item name="colorOnPrimary">@color/white</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorSecondaryVariant">@color/teal_700</item>
-        <item name="colorOnSecondary">@color/black</item>
-        <!-- Status bar color. -->
+        <!-- Warna utama brand -->
+        <item name="colorPrimary">#850E35</item>
+        <item name="colorPrimaryVariant">#6A0D4A</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+
+        <!-- Warna sekunder -->
+        <item name="colorSecondary">#FF8FA3</item>
+        <item name="colorSecondaryVariant">#E67389</item>
+        <item name="colorOnSecondary">@android:color/white</item>
+
+        <!-- Status bar -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
-        <!-- Customize your theme here. -->
+
+        <!-- Atur warna komponen Material -->
+        <item name="colorControlActivated">#850E35</item> <!-- Outline aktif -->
+        <item name="colorControlNormal">#B0AFAF</item>    <!-- Outline default -->
+        <item name="android:textColorHint">#850E35</item> <!-- Warna hint -->
     </style>
+
 </resources>
