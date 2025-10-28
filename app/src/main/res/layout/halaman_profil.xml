@@ -1,180 +1,207 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFF6E9">
+    android:background="#FFF7EB"
+    tools:context=".halamanprofil">
 
+    <!-- Judul + Icon Pengaturan -->
+    <TextView
+        android:id="@+id/tvProfileTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_marginStart="24dp"
+        android:text="Profile"
+        android:textColor="#8B1430"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <!-- Icon Pengaturan di kanan atas -->
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/icSettings"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="24dp"
+        android:layout_marginTop="24dp"
+        app:srcCompat="@drawable/ic_settings"
+        app:tint="#8B1430" />
+
+    <!-- Bagian Foto & Nama -->
     <LinearLayout
+        android:id="@+id/layoutProfile"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center_horizontal"
-        android:padding="24dp">
+        android:layout_below="@id/tvProfileTitle"
+        android:layout_marginTop="24dp"
+        android:layout_marginHorizontal="24dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
-        <!-- Foto Profil Bulat -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            app:cardCornerRadius="50dp"
-            app:cardElevation="0dp"
-            android:layout_marginBottom="16dp"
-            android:backgroundTint="@android:color/darker_gray">
+        <ImageView
+            android:id="@+id/imgProfile"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/ic_profile"
+            android:background="@drawable/circle_bg"
+            android:padding="4dp" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvNama"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Intan Praditha"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#2E2E2E" />
+
+            <TextView
+                android:id="@+id/tvUsername"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="intannnnn"
+                android:textColor="#7C7C7C"
+                android:textSize="14sp" />
+
+            <!-- Tombol Edit Profile versi sedang -->
+            <Button
+                android:id="@+id/btnEditProfile"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:layout_marginTop="8dp"
+                android:paddingHorizontal="16dp"
+                android:background="@drawable/button_red"
+                android:text="Edit Profile"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Menu Box -->
+    <LinearLayout
+        android:id="@+id/layoutMenu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/layoutProfile"
+        android:layout_marginTop="24dp"
+        android:layout_marginHorizontal="24dp"
+        android:background="@drawable/bg_white_rounded"
+        android:orientation="vertical"
+        android:elevation="3dp">
+
+        <!-- Menu: Notification -->
+        <LinearLayout
+            android:id="@+id/menuNotification"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:gravity="center_vertical">
 
             <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/imgProfile"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="20dp"
-                android:scaleType="centerInside"
-                app:srcCompat="@drawable/baseline_person_24"
-                app:tint="#FFFFFF"
-                android:contentDescription="Foto Profil"/>
-        </androidx.cardview.widget.CardView>
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                app:srcCompat="@drawable/ic_notification"
+                app:tint="#2E2E2E" />
 
-        <!-- Nama -->
-        <TextView
-            android:id="@+id/tvName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Nama Pengguna"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="#000000" />
-
-        <!-- Nomor HP -->
-        <TextView
-            android:id="@+id/tvPhone"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="08xxxxxxxxxx"
-            android:textSize="14sp"
-            android:textColor="#666666"
-            android:layout_marginBottom="24dp"/>
-
-        <!-- Card Menu -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardElevation="6dp"
-            app:cardCornerRadius="16dp"
-            android:layout_marginBottom="24dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:divider="?android:attr/dividerHorizontal"
-                android:showDividers="middle">
+                android:layout_marginStart="16dp"
+                android:layout_weight="1"
+                android:text="Notification"
+                android:textColor="#2E2E2E"
+                android:textSize="15sp" />
 
-                <!-- Edit Profil -->
-                <LinearLayout
-                    android:id="@+id/menuEditProfil"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                app:srcCompat="@drawable/ic_arrow_right"
+                app:tint="#2E2E2E" />
+        </LinearLayout>
 
-                    <androidx.appcompat.widget.AppCompatImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        app:srcCompat="@drawable/baseline_person_24"
-                        app:tint="#666666"
-                        android:layout_marginEnd="16dp"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Edit Profil"
-                        android:textSize="16sp"
-                        android:textColor="#000000"/>
-                </LinearLayout>
-
-                <!-- Pengaturan -->
-                <LinearLayout
-                    android:id="@+id/menuPengaturan"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <androidx.appcompat.widget.AppCompatImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        app:srcCompat="@drawable/baseline_lock_24"
-                        app:tint="#666666"
-                        android:layout_marginEnd="16dp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Pengaturan"
-                        android:textSize="16sp"
-                        android:textColor="#000000"/>
-                </LinearLayout>
-
-                <!-- Bantuan -->
-                <LinearLayout
-                    android:id="@+id/menuBantuan"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <androidx.appcompat.widget.AppCompatImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        app:srcCompat="@drawable/baseline_email_24"
-                        app:tint="#666666"
-                        android:layout_marginEnd="16dp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Bantuan"
-                        android:textSize="16sp"
-                        android:textColor="#000000"/>
-                </LinearLayout>
-
-                <!-- Tentang Aplikasi -->
-                <LinearLayout
-                    android:id="@+id/menuTentang"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <androidx.appcompat.widget.AppCompatImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        app:srcCompat="@drawable/baseline_info_24"
-                        app:tint="#666666"
-                        android:layout_marginEnd="16dp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Tentang Aplikasi"
-                        android:textSize="16sp"
-                        android:textColor="#000000"/>
-                </LinearLayout>
-
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- Logout -->
-        <Button
-            android:id="@+id/btnLogout"
+        <!-- Menu: Siklus -->
+        <LinearLayout
+            android:id="@+id/menuSiklus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="LOGOUT"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#D32F2F"
-            android:textAllCaps="true"/>
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:gravity="center_vertical">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                app:srcCompat="@drawable/ic_cycle"
+                app:tint="#2E2E2E" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_weight="1"
+                android:text="Siklus"
+                android:textColor="#2E2E2E"
+                android:textSize="15sp" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                app:srcCompat="@drawable/ic_arrow_right"
+                app:tint="#2E2E2E" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0" />
+
+        <!-- Menu: Transfer Data -->
+        <LinearLayout
+            android:id="@+id/menuTransfer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:gravity="center_vertical">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                app:srcCompat="@drawable/ic_download"
+                app:tint="#2E2E2E" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_weight="1"
+                android:text="Transfer Data"
+                android:textColor="#2E2E2E"
+                android:textSize="15sp" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                app:srcCompat="@drawable/ic_arrow_right"
+                app:tint="#2E2E2E" />
+        </LinearLayout>
 
     </LinearLayout>
-</ScrollView>
+
+</RelativeLayout>
