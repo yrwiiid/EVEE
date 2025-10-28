@@ -14,9 +14,9 @@ import androidx.fragment.app.Fragment;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -29,8 +29,8 @@ public class halamanhome extends Fragment {
     private LinearLayout calendarContainer;
 
     private FirebaseAuth mAuth;
-    private DatabaseReference dbRef;
     private FirebaseFirestore firestore;
+    private final SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -38,7 +38,6 @@ public class halamanhome extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.halaman_home, container, false);
 
-        // Inisialisasi view
         textGreeting = view.findViewById(R.id.textGreeting);
         textDate = view.findViewById(R.id.textDate);
         textCycle = view.findViewById(R.id.textCycle);
@@ -47,104 +46,139 @@ public class halamanhome extends Fragment {
         calendarContainer = view.findViewById(R.id.calendarContainer);
 
         mAuth = FirebaseAuth.getInstance();
-        dbRef = FirebaseDatabase.getInstance().getReference("Users");
         firestore = FirebaseFirestore.getInstance();
 
         FirebaseUser currentUser = mAuth.getCurrentUser();
-
-        // 🔹 Greeting
         if (currentUser != null) {
-            String uid = currentUser.getUid();
-            firestore.collection("Users").document(uid).get().addOnSuccessListener(doc -> {
-                if (doc.exists()) {
-                    String name = currentUser.getDisplayName();
-                    textGreeting.setText(name != null && !name.isEmpty() ? "Halo, " + name + "!" : "Halo, pengguna!");
-                }
-            });
+            String name = currentUser.getDisplayName();
+            textGreeting.setText(name != null && !name.isEmpty()
+                    ? "Halo, " + name + "!"
+                    : "Halo, pengguna!");
         }
 
-        // 🔹 Tanggal hari ini
         String todayDate = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
                 .format(Calendar.getInstance().getTime());
         textDate.setText(todayDate);
 
-        // 🔹 Generate kalender horizontal
         generateCalendar();
 
         if (currentUser != null) {
-            String uid = currentUser.getUid();
-
-            // 🔹 Ambil siklus dari RTDB
-            dbRef.child(uid).child("cycle").get().addOnSuccessListener(snapshot -> {
-                if (snapshot.exists()) {
-                    String startDateStr = snapshot.child("startDate").getValue(String.class);
-                    if (startDateStr != null) {
-                        try {
-                            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
-                            Date startDate = sdf.parse(startDateStr);
-
-                            Calendar cal = Calendar.getInstance();
-                            cal.setTime(startDate);
-                            cal.add(Calendar.DAY_OF_MONTH, 28); // siklus default
-                            String nextCycle = sdf.format(cal.getTime());
-
-                            textCycle.setText("Menstruasi berikutnya: " + nextCycle);
-                        } catch (Exception e) {
-                            textCycle.setText("Data siklus tidak valid");
-                        }
-                    }
-                } else {
-                    textCycle.setText("Belum ada data siklus");
-                }
-            });
-
-            // 🔹 Ambil mood dari Firestore
-            String today = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
-            firestore.collection("Users")
-                    .document(uid)
-                    .collection("Mood")
-                    .document(today)
-                    .get()
-                    .addOnSuccessListener(document -> {
-                        if (document.exists()) {
-                            String mood = document.getString("mood");
-                            if (mood != null) {
-                                switch (mood) {
-                                    case "Senang 😊":
-                                        textMoodEmoji.setText("😊");
-                                        textMoodDesc.setText("Senang");
-                                        break;
-                                    case "Biasa 😐":
-                                        textMoodEmoji.setText("😐");
-                                        textMoodDesc.setText("Biasa aja");
-                                        break;
-                                    case "Sedih 😢":
-                                        textMoodEmoji.setText("😢");
-                                        textMoodDesc.setText("Sedih");
-                                        break;
-                                    default:
-                                        textMoodEmoji.setText("❓");
-                                        textMoodDesc.setText("Mood tidak diketahui");
-                                        break;
-                                }
-                            }
-                        } else {
-                            textMoodEmoji.setText("😐");
-                            textMoodDesc.setText("Belum ada mood hari ini");
-                        }
-                    });
+            loadCycleData(currentUser.getUid());
+            loadMoodData(currentUser.getUid());
         }
 
         return view;
     }
 
+    // 🔹 Ambil data siklus terbaru
+    private void loadCycleData(String uid) {
+        firestore.collection("users")
+                .document(uid)
+                .collection("cycles")
+                .orderBy("startDate", Query.Direction.DESCENDING)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(query -> {
+                    if (query.isEmpty()) {
+                        textCycle.setText("Belum ada data siklus");
+                        return;
+                    }
+
+                    DocumentSnapshot doc = query.getDocuments().get(0);
+                    String startDateStr = doc.getString("startDate");
+                    String endDateStr = doc.getString("endDate");
+
+                    firestore.collection("users")
+                            .document(uid)
+                            .get()
+                            .addOnSuccessListener(userDoc -> {
+                                int avgCycle = userDoc.contains("averageCycleLength")
+                                        ? userDoc.getLong("averageCycleLength").intValue() : 28;
+                                int avgDuration = userDoc.contains("averageDuration")
+                                        ? userDoc.getLong("averageDuration").intValue() : 5;
+
+                                try {
+                                    if (startDateStr == null) {
+                                        textCycle.setText("Data siklus tidak lengkap");
+                                        return;
+                                    }
+
+                                    Date startDate = sdf.parse(startDateStr);
+                                    Calendar today = Calendar.getInstance();
+                                    long diffDays = (today.getTimeInMillis() - startDate.getTime()) / (1000 * 60 * 60 * 24);
+
+                                    if (diffDays < avgDuration) {
+                                        // sedang haid
+                                        textCycle.setText("Sedang menstruasi 💧 (hari ke-" + (diffDays + 1) + ")");
+                                    } else if (diffDays >= 13 && diffDays <= 16) {
+                                        // masa subur
+                                        textCycle.setText("Masa subur 🌸");
+                                    } else if (diffDays >= avgCycle) {
+                                        // haid berikutnya diperkirakan
+                                        Calendar nextStart = Calendar.getInstance();
+                                        nextStart.setTime(startDate);
+                                        nextStart.add(Calendar.DAY_OF_MONTH, avgCycle);
+
+                                        Calendar nextEnd = (Calendar) nextStart.clone();
+                                        nextEnd.add(Calendar.DAY_OF_MONTH, avgDuration - 1);
+
+                                        String startNext = new SimpleDateFormat("dd MMM", Locale.getDefault()).format(nextStart.getTime());
+                                        String endNext = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(nextEnd.getTime());
+                                        textCycle.setText("Menstruasi berikutnya: " + startNext + " - " + endNext);
+                                    } else {
+                                        textCycle.setText("Siklus berjalan normal ✨");
+                                    }
+                                } catch (Exception e) {
+                                    textCycle.setText("Gagal membaca data siklus");
+                                }
+                            });
+                })
+                .addOnFailureListener(e -> textCycle.setText("Gagal memuat data: " + e.getMessage()));
+    }
+
+    // 🔹 Ambil mood
+    private void loadMoodData(String uid) {
+        String today = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
+        firestore.collection("Users")
+                .document(uid)
+                .collection("Mood")
+                .document(today)
+                .get()
+                .addOnSuccessListener(document -> {
+                    if (document.exists()) {
+                        String mood = document.getString("mood");
+                        if (mood != null) {
+                            switch (mood) {
+                                case "Senang 😊":
+                                    textMoodEmoji.setText("😊");
+                                    textMoodDesc.setText("Senang");
+                                    break;
+                                case "Biasa 😐":
+                                    textMoodEmoji.setText("😐");
+                                    textMoodDesc.setText("Biasa aja");
+                                    break;
+                                case "Sedih 😢":
+                                    textMoodEmoji.setText("😢");
+                                    textMoodDesc.setText("Sedih");
+                                    break;
+                                default:
+                                    textMoodEmoji.setText("❓");
+                                    textMoodDesc.setText("Mood tidak diketahui");
+                                    break;
+                            }
+                        }
+                    } else {
+                        textMoodEmoji.setText("😐");
+                        textMoodDesc.setText("Belum ada mood hari ini");
+                    }
+                });
+    }
+
+    // 🔹 Kalender horizontal mini
     private void generateCalendar() {
         calendarContainer.removeAllViews();
 
-        // simpan kalender "hari ini"
         Calendar now = Calendar.getInstance();
-
-        // bikin kalender untuk looping, dimundurin 3 hari
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_MONTH, -3);
 
@@ -152,7 +186,6 @@ public class halamanhome extends Fragment {
             int day = calendar.get(Calendar.DAY_OF_MONTH);
             String dayName = new SimpleDateFormat("EEE", Locale.getDefault()).format(calendar.getTime());
 
-            // Container hari
             LinearLayout dayBox = new LinearLayout(getContext());
             dayBox.setOrientation(LinearLayout.VERTICAL);
             dayBox.setGravity(Gravity.CENTER);
@@ -168,39 +201,31 @@ public class halamanhome extends Fragment {
             dayBox.setPadding(pad, pad, pad, pad);
             dayBox.setMinimumWidth((int) (48 * getResources().getDisplayMetrics().density));
 
-            // Cek kalau tanggal, bulan, tahun sama dengan hari ini → tandai
-            if (calendar.get(Calendar.DAY_OF_MONTH) == now.get(Calendar.DAY_OF_MONTH) &&
-                    calendar.get(Calendar.MONTH) == now.get(Calendar.MONTH) &&
-                    calendar.get(Calendar.YEAR) == now.get(Calendar.YEAR)) {
+            if (calendar.get(Calendar.DAY_OF_MONTH) == now.get(Calendar.DAY_OF_MONTH)
+                    && calendar.get(Calendar.MONTH) == now.get(Calendar.MONTH)
+                    && calendar.get(Calendar.YEAR) == now.get(Calendar.YEAR)) {
                 dayBox.setBackgroundResource(R.drawable.bg_today);
             } else {
                 dayBox.setBackgroundResource(R.drawable.bg_normal_day);
             }
 
-            // Angka tanggal
             TextView dayNumber = new TextView(getContext());
             dayNumber.setText(String.valueOf(day));
             dayNumber.setTextSize(16);
             dayNumber.setTextColor(Color.parseColor("#6A0D4A"));
             dayNumber.setGravity(Gravity.CENTER);
 
-            // Nama hari
             TextView dayText = new TextView(getContext());
             dayText.setText(dayName);
             dayText.setTextSize(10);
             dayText.setTextColor(Color.parseColor("#B0AFAF"));
             dayText.setGravity(Gravity.CENTER);
 
-            // Tambahin ke box
             dayBox.addView(dayNumber);
             dayBox.addView(dayText);
-
-            // Tambahin ke container
             calendarContainer.addView(dayBox);
 
-            // lanjut ke tanggal berikutnya
             calendar.add(Calendar.DAY_OF_MONTH, 1);
         }
     }
-
 }

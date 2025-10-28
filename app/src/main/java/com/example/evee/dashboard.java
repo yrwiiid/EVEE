@@ -24,12 +24,12 @@ public class dashboard extends AppCompatActivity {
             int id = item.getItemId();
 
             // Gunakan if-else alih-alih switch-case
-            if (id == R.id.nav_notes) {
-                selectedFragment = new halamannotes(); // nanti buat class halamannotes
+            if (id == R.id.nav_home) {
+                selectedFragment = new halamanhome(); // nanti buat class halamannotes
             } else if (id == R.id.nav_calendar) {
                 selectedFragment = new halamancalendar(); // nanti buat class halamancalendar
-            } else if (id == R.id.nav_home) {
-                selectedFragment = new halamanhome();
+            } else if (id == R.id.nav_notes) {
+                selectedFragment = new halamannotes();
             } else if (id == R.id.nav_mood) {
                 selectedFragment = new halamanmood(); // nanti buat class halamanmood
             } else if (id == R.id.nav_profile) {
