@@ -36,6 +36,7 @@ dependencies {
     implementation("com.prolificinteractive:material-calendarview:1.4.3")
     implementation("androidx.cardview:cardview:1.0.0")
     implementation(platform("com.google.firebase:firebase-bom:34.2.0"))
+    implementation("de.hdodenhof:circleimageview:3.1.0")
     implementation(libs.firebase.database)
     implementation(libs.firebase.auth)
     implementation(libs.appcompat)
