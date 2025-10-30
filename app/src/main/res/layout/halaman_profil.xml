@@ -48,7 +48,7 @@
                 android:id="@+id/tvNama"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Intan Praditha"
+                android:text="Nama Pengguna"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="#2E2E2E" />
@@ -57,7 +57,7 @@
                 android:id="@+id/tvUsername"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="intannnnn"
+                android:text="Username Pengguna"
                 android:textColor="#7C7C7C"
                 android:textSize="14sp" />
 

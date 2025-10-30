@@ -93,10 +93,44 @@
                 android:textSize="15sp" />
 
             <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/iconArrowHelp"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                app:srcCompat="@drawable/ic_arrow_right"
+                app:srcCompat="@drawable/ic_arrow_down"
                 app:tint="#2E2E2E" />
+        </LinearLayout>
+
+        <!-- Konten Bantuan -->
+        <LinearLayout
+            android:id="@+id/layoutHelpDetail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:paddingStart="56dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hubungi Tim Kami:"
+                android:textColor="#2E2E2E"
+                android:textSize="14sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Email: support@eveeapp.com"
+                android:textColor="#555555"
+                android:textSize="13sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="WhatsApp: +62 812-3456-7890"
+                android:textColor="#555555"
+                android:textSize="13sp" />
         </LinearLayout>
 
         <View
@@ -129,11 +163,32 @@
                 android:textSize="15sp" />
 
             <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/iconArrowAbout"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                app:srcCompat="@drawable/ic_arrow_right"
+                app:srcCompat="@drawable/ic_arrow_down"
                 app:tint="#2E2E2E" />
         </LinearLayout>
+
+        <!-- Konten Tentang Aplikasi (narasi panjang) -->
+        <LinearLayout
+            android:id="@+id/layoutAboutDetail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:paddingStart="56dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="12dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🩷 Tentang Aplikasi EVEE\n\nAplikasi EVEE adalah sebuah inovasi digital yang dirancang khusus untuk membantu wanita dalam memantau, memahami, dan mengelola siklus menstruasi mereka secara lebih cerdas dan teratur. Melalui fitur pelacakan dan pencatatan yang akurat, EVEE membantu pengguna mengenali pola siklus menstruasi, memprediksi masa subur, serta memberikan pengingat penting terkait jadwal haid berikutnya.\n\nEVEE dikembangkan dengan tujuan utama untuk meningkatkan kesadaran wanita terhadap kesehatan reproduksi mereka. Dengan teknologi pelacakan yang mudah digunakan, aplikasi ini memungkinkan pengguna mencatat berbagai gejala harian seperti perubahan suasana hati, tingkat energi, hingga keluhan fisik seperti nyeri haid atau kelelahan. Data yang dikumpulkan akan diolah menjadi informasi yang bermanfaat agar pengguna dapat memahami kondisi tubuhnya secara lebih mendalam.\n\nSelain berfungsi sebagai alat pelacak, EVEE juga berperan sebagai pendamping digital yang peduli terhadap kesejahteraan wanita. Melalui antarmuka yang lembut dan intuitif, pengguna dapat mengakses edukasi seputar kesehatan menstruasi, menjaga keseimbangan hormon, serta mendapatkan tips perawatan diri yang relevan dengan fase siklus mereka.\n\nAplikasi EVEE hadir untuk memberikan rasa percaya diri dan kenyamanan dalam setiap fase kehidupan wanita. Dengan bantuan EVEE, pengguna tidak hanya melacak tanggal menstruasi, tetapi juga membangun hubungan yang lebih baik dengan tubuh mereka sendiri karena memahami diri adalah langkah pertama menuju kesehatan yang lebih baik."
+                android:textColor="#2E2E2E"
+                android:textSize="13sp" />
+        </LinearLayout>
+
     </LinearLayout>
 
 </RelativeLayout>
