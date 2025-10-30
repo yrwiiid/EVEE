@@ -241,5 +241,4 @@
         android:textSize="14sp"
         android:textAllCaps="false"
         android:paddingHorizontal="24dp" />
-
 </RelativeLayout>

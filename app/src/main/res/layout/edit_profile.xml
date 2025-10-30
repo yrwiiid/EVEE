@@ -20,19 +20,6 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="28dp"/>
 
-    <!-- Icon Settings -->
-    <ImageView
-        android:id="@+id/iconSettings"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:src="@drawable/ic_settings"
-        app:tint="#8B0015"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginEnd="24dp"
-        android:layout_marginTop="28dp"
-        android:contentDescription="Settings"/>
-
     <!-- Foto Profil -->
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/profileImage"

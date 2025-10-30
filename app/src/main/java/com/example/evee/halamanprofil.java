@@ -31,7 +31,7 @@ public class halamanprofil extends Fragment {
     private static final String TAG = "HalamanProfil";
 
     private Button btnEditProfile, btnLogout;
-    private LinearLayout menuNotification, menuSiklus, menuTransfer;
+    private LinearLayout menuNotification, menuSiklus, menuTransfer, menuSettings; // ✅ tambahkan menuSettings
     private TextView tvNama, tvUsername;
     private ImageView imgProfile;
 
@@ -58,6 +58,7 @@ public class halamanprofil extends Fragment {
         menuNotification = view.findViewById(R.id.menuNotification);
         menuSiklus = view.findViewById(R.id.menuSiklus);
         menuTransfer = view.findViewById(R.id.menuTransfer);
+        menuSettings = view.findViewById(R.id.menuSettings); // ✅ inisialisasi pengaturan
 
         // Firebase
         mAuth = FirebaseAuth.getInstance();
@@ -85,13 +86,27 @@ public class halamanprofil extends Fragment {
         // 🔹 Logout
         btnLogout.setOnClickListener(v -> doLogout());
 
-        // 🔹 Menu tambahan
+        // 🔹 Menu Notification
         menuNotification.setOnClickListener(v ->
                 Toast.makeText(requireActivity(), "Menu Notification diklik", Toast.LENGTH_SHORT).show());
+
+        // 🔹 Menu Siklus
         menuSiklus.setOnClickListener(v ->
                 Toast.makeText(requireActivity(), "Menu Siklus diklik", Toast.LENGTH_SHORT).show());
+
+        // 🔹 Menu Transfer
         menuTransfer.setOnClickListener(v ->
                 Toast.makeText(requireActivity(), "Menu Transfer diklik", Toast.LENGTH_SHORT).show());
+
+        // 🔹 Menu Pengaturan (buka halaman pengaturan)
+        menuSettings.setOnClickListener(v -> {
+            halamansettings settingsFragment = new halamansettings();
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.nav_host_fragment, settingsFragment)
+                    .addToBackStack(null)
+                    .commit();
+        });
 
         return view;
     }
