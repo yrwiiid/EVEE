@@ -7,7 +7,7 @@
     android:background="#FFF7EB"
     tools:context=".halamanprofil">
 
-    <!-- Judul + Icon Pengaturan -->
+    <!-- Judul Halaman -->
     <TextView
         android:id="@+id/tvProfileTitle"
         android:layout_width="wrap_content"
@@ -18,17 +18,6 @@
         android:textColor="#8B1430"
         android:textSize="20sp"
         android:textStyle="bold" />
-
-    <!-- Icon Pengaturan di kanan atas -->
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/icSettings"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="24dp"
-        android:layout_marginTop="24dp"
-        app:srcCompat="@drawable/ic_settings"
-        app:tint="#8B1430" />
 
     <!-- Bagian Foto & Nama -->
     <LinearLayout
@@ -72,7 +61,6 @@
                 android:textColor="#7C7C7C"
                 android:textSize="14sp" />
 
-            <!-- Tombol Edit Profile versi sedang -->
             <Button
                 android:id="@+id/btnEditProfile"
                 android:layout_width="wrap_content"
@@ -202,6 +190,56 @@
                 app:tint="#2E2E2E" />
         </LinearLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0" />
+
+        <!-- 🔧 Menu: Pengaturan -->
+        <LinearLayout
+            android:id="@+id/menuSettings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:gravity="center_vertical">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                app:srcCompat="@drawable/ic_settings"
+                app:tint="#2E2E2E" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_weight="1"
+                android:text="Pengaturan"
+                android:textColor="#2E2E2E"
+                android:textSize="15sp" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                app:srcCompat="@drawable/ic_arrow_right"
+                app:tint="#2E2E2E" />
+        </LinearLayout>
     </LinearLayout>
+
+    <!-- Tombol Logout -->
+    <Button
+        android:id="@+id/btnLogout"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_below="@id/layoutMenu"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/button_red"
+        android:text="Logout"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:textAllCaps="false"
+        android:paddingHorizontal="24dp" />
 
 </RelativeLayout>

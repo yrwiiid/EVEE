@@ -30,13 +30,11 @@ public class halamanprofil extends Fragment {
 
     private static final String TAG = "HalamanProfil";
 
-    // View
-    private Button btnLogout;
-    private LinearLayout menuEditProfil, menuPengaturan, menuBantuan, menuTentang;
-    private TextView tvName, tvPhone;
+    private Button btnEditProfile, btnLogout;
+    private LinearLayout menuNotification, menuSiklus, menuTransfer;
+    private TextView tvNama, tvUsername;
     private ImageView imgProfile;
 
-    // Firebase
     private FirebaseAuth mAuth;
     private DatabaseReference dbRef;
 
@@ -51,91 +49,86 @@ public class halamanprofil extends Fragment {
 
         View view = inflater.inflate(R.layout.halaman_profil, container, false);
 
-        // Init view
-        btnLogout = view.findViewById(R.id.btnLogout);
-        menuEditProfil = view.findViewById(R.id.menuEditProfil);
-        menuPengaturan = view.findViewById(R.id.menuPengaturan);
-        menuBantuan = view.findViewById(R.id.menuBantuan);
-        menuTentang = view.findViewById(R.id.menuTentang);
-        tvName = view.findViewById(R.id.tvName);
-        tvPhone = view.findViewById(R.id.tvPhone);
+        // Inisialisasi View
+        tvNama = view.findViewById(R.id.tvNama);
+        tvUsername = view.findViewById(R.id.tvUsername);
         imgProfile = view.findViewById(R.id.imgProfile);
+        btnEditProfile = view.findViewById(R.id.btnEditProfile);
+        btnLogout = view.findViewById(R.id.btnLogout);
+        menuNotification = view.findViewById(R.id.menuNotification);
+        menuSiklus = view.findViewById(R.id.menuSiklus);
+        menuTransfer = view.findViewById(R.id.menuTransfer);
 
         // Firebase
         mAuth = FirebaseAuth.getInstance();
-        dbRef = FirebaseDatabase.getInstance()
-                .getReferenceFromUrl("https://evee-aee6e-default-rtdb.firebaseio.com/");
+        dbRef = FirebaseDatabase.getInstance().getReference("Users");
 
         // Ambil data user aktif
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
             loadUserData(user.getUid());
         } else {
-            tvName.setText("User tidak login");
-            tvPhone.setText("-");
+            tvNama.setText("User tidak login");
+            tvUsername.setText("-");
         }
 
-        // Tombol Logout
+        // 🔹 Edit Profil -> Ganti fragment
+        btnEditProfile.setOnClickListener(v -> {
+            halamaneditprofil editProfilFragment = new halamaneditprofil();
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.nav_host_fragment, editProfilFragment)
+                    .addToBackStack(null)
+                    .commit();
+        });
+
+        // 🔹 Logout
         btnLogout.setOnClickListener(v -> doLogout());
 
-        // Menu klik
-        menuEditProfil.setOnClickListener(v ->
-                Toast.makeText(requireActivity(), "Edit Profil diklik", Toast.LENGTH_SHORT).show()
-        );
-        menuPengaturan.setOnClickListener(v ->
-                Toast.makeText(requireActivity(), "Pengaturan diklik", Toast.LENGTH_SHORT).show()
-        );
-        menuBantuan.setOnClickListener(v ->
-                Toast.makeText(requireActivity(), "Bantuan diklik", Toast.LENGTH_SHORT).show()
-        );
-        menuTentang.setOnClickListener(v ->
-                Toast.makeText(requireActivity(), "Tentang Aplikasi diklik", Toast.LENGTH_SHORT).show()
-        );
+        // 🔹 Menu tambahan
+        menuNotification.setOnClickListener(v ->
+                Toast.makeText(requireActivity(), "Menu Notification diklik", Toast.LENGTH_SHORT).show());
+        menuSiklus.setOnClickListener(v ->
+                Toast.makeText(requireActivity(), "Menu Siklus diklik", Toast.LENGTH_SHORT).show());
+        menuTransfer.setOnClickListener(v ->
+                Toast.makeText(requireActivity(), "Menu Transfer diklik", Toast.LENGTH_SHORT).show());
 
         return view;
     }
 
     private void loadUserData(String uid) {
-        // Ambil dari Firebase Realtime Database (Users/UID)
-        dbRef.child("Users").child(uid)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (snapshot.exists()) {
-                            String name = snapshot.child("name").getValue(String.class);
-                            String email = snapshot.child("email").getValue(String.class);
-                            String phone = snapshot.child("phone").getValue(String.class);
+        dbRef.child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    String nama = snapshot.child("name").getValue(String.class);
+                    String username = snapshot.child("username").getValue(String.class);
 
-                            tvName.setText(name != null ? name : "Nama tidak tersedia");
-                            tvPhone.setText(phone != null ? phone : (email != null ? email : "-"));
-                        } else {
-                            tvName.setText("Data tidak ditemukan");
-                            tvPhone.setText("-");
-                        }
-                    }
+                    tvNama.setText(nama != null ? nama : "Nama tidak tersedia");
+                    tvUsername.setText(username != null ? username : "-");
+                } else {
+                    tvNama.setText("Data tidak ditemukan");
+                    tvUsername.setText("-");
+                }
+            }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Log.e(TAG, "Gagal ambil data: " + error.getMessage());
-                    }
-                });
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "Gagal ambil data: " + error.getMessage());
+            }
+        });
     }
 
     private void doLogout() {
-        // Hapus SharedPreferences
         SharedPreferences prefs = requireActivity().getSharedPreferences("USER_PREFS", Context.MODE_PRIVATE);
         prefs.edit().clear().apply();
 
-        // Logout Firebase
         mAuth.signOut();
 
         Toast.makeText(requireContext(), "Berhasil Logout", Toast.LENGTH_SHORT).show();
 
-        // Intent ke halaman login
         Intent intent = new Intent(requireActivity(), loginactivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        requireActivity().startActivity(intent);
-
-        requireActivity().finishAffinity();
+        startActivity(intent);
     }
 }
