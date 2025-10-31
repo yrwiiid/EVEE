@@ -28,7 +28,7 @@ public class dashboard extends AppCompatActivity {
                 selectedFragment = new halamanhome(); // nanti buat class halamannotes
             } else if (id == R.id.nav_calendar) {
                 selectedFragment = new halamancalendar(); // nanti buat class halamancalendar
-            } else if (id == R.id.nav_notes) {
+            } else if (id == R.id.nav_artikel) {
                 selectedFragment = new halamannotes();
             } else if (id == R.id.nav_mood) {
                 selectedFragment = new halamanmood(); // nanti buat class halamanmood

@@ -12,9 +12,9 @@
         android:title="Calendar"/>
 
     <item
-        android:id="@+id/nav_notes"
+        android:id="@+id/nav_artikel"
         android:icon="@drawable/ic_notes"
-        android:title="Notes"/>
+        android:title="Artikel"/>
 
     <item
         android:id="@+id/nav_mood"

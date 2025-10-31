@@ -7,188 +7,256 @@
     android:background="#FFF7EB"
     tools:context=".halamansettings">
 
-    <!-- Judul Halaman -->
-    <TextView
-        android:id="@+id/tvSettingsTitle"
+    <!-- Header -->
+    <LinearLayout
+        android:id="@+id/layoutHeader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="24dp"
-        android:text="Pengaturan"
-        android:textColor="#8B1430"
-        android:textSize="22sp"
-        android:textStyle="bold" />
+        android:layout_marginTop="36dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
-    <!-- Container Menu -->
-    <LinearLayout
-        android:id="@+id/layoutSettingsMenu"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/tvSettingsTitle"
-        android:layout_marginTop="24dp"
-        android:layout_marginHorizontal="24dp"
-        android:orientation="vertical"
-        android:background="@drawable/bg_white_rounded"
-        android:elevation="3dp"
-        android:paddingVertical="8dp">
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/iconBack"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            app:srcCompat="@drawable/ic_arrow_left"
+            app:tint="#8B1430" />
 
-        <!-- Menu: Ganti Password -->
-        <LinearLayout
-            android:id="@+id/menuChangePassword"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/tvSettingsTitle"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="16dp"
-            android:gravity="center_vertical">
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                app:srcCompat="@drawable/ic_lock"
-                app:tint="#2E2E2E" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_weight="1"
-                android:text="Ganti Password"
-                android:textColor="#2E2E2E"
-                android:textSize="15sp" />
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                app:srcCompat="@drawable/ic_arrow_right"
-                app:tint="#2E2E2E" />
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#E0E0E0" />
-
-        <!-- Menu: Bantuan -->
-        <LinearLayout
-            android:id="@+id/menuHelp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="16dp"
-            android:gravity="center_vertical">
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                app:srcCompat="@drawable/ic_help"
-                app:tint="#2E2E2E" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_weight="1"
-                android:text="Bantuan"
-                android:textColor="#2E2E2E"
-                android:textSize="15sp" />
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/iconArrowHelp"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                app:srcCompat="@drawable/ic_arrow_down"
-                app:tint="#2E2E2E" />
-        </LinearLayout>
-
-        <!-- Konten Bantuan -->
-        <LinearLayout
-            android:id="@+id/layoutHelpDetail"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone"
-            android:paddingStart="56dp"
-            android:paddingEnd="16dp"
-            android:paddingBottom="12dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Hubungi Tim Kami:"
-                android:textColor="#2E2E2E"
-                android:textSize="14sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Email: support@eveeapp.com"
-                android:textColor="#555555"
-                android:textSize="13sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="WhatsApp: +62 812-3456-7890"
-                android:textColor="#555555"
-                android:textSize="13sp" />
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#E0E0E0" />
-
-        <!-- Menu: Tentang Aplikasi -->
-        <LinearLayout
-            android:id="@+id/menuAbout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="16dp"
-            android:gravity="center_vertical">
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                app:srcCompat="@drawable/ic_info"
-                app:tint="#2E2E2E" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_weight="1"
-                android:text="Tentang Aplikasi"
-                android:textColor="#2E2E2E"
-                android:textSize="15sp" />
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/iconArrowAbout"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                app:srcCompat="@drawable/ic_arrow_down"
-                app:tint="#2E2E2E" />
-        </LinearLayout>
-
-        <!-- Konten Tentang Aplikasi (narasi panjang) -->
-        <LinearLayout
-            android:id="@+id/layoutAboutDetail"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone"
-            android:paddingStart="56dp"
-            android:paddingEnd="16dp"
-            android:paddingBottom="12dp">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="🩷 Tentang Aplikasi EVEE\n\nAplikasi EVEE adalah sebuah inovasi digital yang dirancang khusus untuk membantu wanita dalam memantau, memahami, dan mengelola siklus menstruasi mereka secara lebih cerdas dan teratur. Melalui fitur pelacakan dan pencatatan yang akurat, EVEE membantu pengguna mengenali pola siklus menstruasi, memprediksi masa subur, serta memberikan pengingat penting terkait jadwal haid berikutnya.\n\nEVEE dikembangkan dengan tujuan utama untuk meningkatkan kesadaran wanita terhadap kesehatan reproduksi mereka. Dengan teknologi pelacakan yang mudah digunakan, aplikasi ini memungkinkan pengguna mencatat berbagai gejala harian seperti perubahan suasana hati, tingkat energi, hingga keluhan fisik seperti nyeri haid atau kelelahan. Data yang dikumpulkan akan diolah menjadi informasi yang bermanfaat agar pengguna dapat memahami kondisi tubuhnya secara lebih mendalam.\n\nSelain berfungsi sebagai alat pelacak, EVEE juga berperan sebagai pendamping digital yang peduli terhadap kesejahteraan wanita. Melalui antarmuka yang lembut dan intuitif, pengguna dapat mengakses edukasi seputar kesehatan menstruasi, menjaga keseimbangan hormon, serta mendapatkan tips perawatan diri yang relevan dengan fase siklus mereka.\n\nAplikasi EVEE hadir untuk memberikan rasa percaya diri dan kenyamanan dalam setiap fase kehidupan wanita. Dengan bantuan EVEE, pengguna tidak hanya melacak tanggal menstruasi, tetapi juga membangun hubungan yang lebih baik dengan tubuh mereka sendiri karena memahami diri adalah langkah pertama menuju kesehatan yang lebih baik."
-                android:textColor="#2E2E2E"
-                android:textSize="13sp" />
-        </LinearLayout>
-
+            android:layout_marginStart="8dp"
+            android:text="Pengaturan"
+            android:textColor="#8B1430"
+            android:textSize="22sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
+    <!-- ScrollView -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/layoutHeader"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="16dp">
+
+        <LinearLayout
+            android:id="@+id/layoutSettingsMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:orientation="vertical"
+            android:background="@drawable/bg_white_rounded"
+            android:elevation="3dp"
+            android:paddingVertical="8dp">
+
+            <!-- Ganti Password -->
+            <LinearLayout
+                android:id="@+id/menuChangePassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    app:srcCompat="@drawable/ic_lock"
+                    app:tint="#2E2E2E" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="1"
+                    android:text="Ganti Password"
+                    android:textColor="#2E2E2E"
+                    android:textSize="16sp" />
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    app:srcCompat="@drawable/ic_arrow_right"
+                    app:tint="#2E2E2E" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#E0E0E0" />
+
+            <!-- Menu Bantuan -->
+            <LinearLayout
+                android:id="@+id/menuHelp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    app:srcCompat="@drawable/ic_help"
+                    app:tint="#2E2E2E" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="1"
+                    android:text="Bantuan"
+                    android:textColor="#2E2E2E"
+                    android:textSize="16sp" />
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/iconArrowHelp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    app:srcCompat="@drawable/ic_arrow_down"
+                    app:tint="#2E2E2E" />
+            </LinearLayout>
+
+            <!-- Konten Bantuan -->
+            <LinearLayout
+                android:id="@+id/layoutHelpDetail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:paddingStart="56dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hubungi Tim Kami:"
+                    android:textColor="#2E2E2E"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="6dp" />
+
+                <!-- Email dan alamatnya sejajar -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/emailText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Email: "
+                        android:textColor="#2E2E2E"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/emailAddressText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="nikmazumroh458@gmail.com"
+                        android:textColor="#1565C0"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:clickable="true"
+                        android:focusable="true" />
+                </LinearLayout>
+
+                <!-- WhatsApp -->
+                <TextView
+                    android:id="@+id/whatsappText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="WhatsApp: +62 812-1760-0757"
+                    android:textColor="#444444"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="8dp"
+                    android:clickable="true"
+                    android:focusable="true" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#E0E0E0" />
+
+            <!-- Menu Tentang Aplikasi -->
+            <LinearLayout
+                android:id="@+id/menuAbout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    app:srcCompat="@drawable/ic_info"
+                    app:tint="#2E2E2E" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="1"
+                    android:text="Tentang Aplikasi"
+                    android:textColor="#2E2E2E"
+                    android:textSize="16sp" />
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/iconArrowAbout"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    app:srcCompat="@drawable/ic_arrow_down"
+                    app:tint="#2E2E2E" />
+            </LinearLayout>
+
+            <!-- Konten Tentang Aplikasi -->
+            <LinearLayout
+                android:id="@+id/layoutAboutDetail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:paddingStart="56dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="400dp"
+                    android:orientation="vertical"
+                    android:background="#FFFFFF"
+                    android:padding="8dp"
+                    android:elevation="1dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="4dp">
+
+                    <ScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scrollbars="vertical"
+                        android:fadeScrollbars="false">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="🩷 Tentang Aplikasi EVEE\n\nAplikasi EVEE adalah sebuah inovasi digital yang dirancang khusus untuk membantu wanita dalam memantau, memahami, dan mengelola siklus menstruasi mereka secara lebih cerdas dan teratur. Melalui fitur pelacakan dan pencatatan yang akurat, EVEE membantu pengguna mengenali pola siklus menstruasi, memprediksi masa subur, serta memberikan pengingat penting terkait jadwal haid berikutnya.\n\nEVEE dikembangkan dengan tujuan utama untuk meningkatkan kesadaran wanita terhadap kesehatan reproduksi mereka. Dengan teknologi pelacakan yang mudah digunakan, aplikasi ini memungkinkan pengguna mencatat berbagai gejala harian seperti perubahan suasana hati, tingkat energi, hingga keluhan fisik seperti nyeri haid atau kelelahan. Data yang dikumpulkan akan diolah menjadi informasi yang bermanfaat agar pengguna dapat memahami kondisi tubuhnya secara lebih mendalam.\n\nSelain berfungsi sebagai alat pelacak, EVEE juga berperan sebagai pendamping digital yang peduli terhadap kesejahteraan wanita. Melalui antarmuka yang lembut dan intuitif, pengguna dapat mengakses edukasi seputar kesehatan menstruasi, menjaga keseimbangan hormon, serta mendapatkan tips perawatan diri yang relevan dengan fase siklus mereka.\n\nAplikasi EVEE hadir untuk memberikan rasa percaya diri dan kenyamanan dalam setiap fase kehidupan wanita. Dengan bantuan EVEE, pengguna tidak hanya melacak tanggal menstruasi, tetapi juga membangun hubungan yang lebih baik dengan tubuh mereka sendiri karena memahami diri adalah langkah pertama menuju kesehatan yang lebih baik."
+                            android:textColor="#2E2E2E"
+                            android:textSize="17sp" />
+                    </ScrollView>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
 </RelativeLayout>
