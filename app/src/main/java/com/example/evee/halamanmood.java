@@ -33,8 +33,9 @@ public class halamanmood extends Fragment {
     private LinearLayout emojiContainer;
     private TextView moodText, dateText;
     private Button btnSimpan;
+    private MoodBarChartView barChartView;
 
-    private int selectedIndex = 4; // posisi awal di tengah (😊)
+    private int selectedIndex = 4;
     private String selectedMood = "Senang";
 
     private final String[] emojis = {"😡", "😞", "😐", "🙂", "😊", "😃", "😆", "🤩", "😍", "😘", "😴", "😭"};
@@ -45,131 +46,117 @@ public class halamanmood extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.halamanmood, container, false);
 
-        // Inisialisasi Firebase
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        // View dari layout
         emojiScroll = view.findViewById(R.id.emojiScroll);
         emojiContainer = view.findViewById(R.id.emojiContainer);
         moodText = view.findViewById(R.id.moodText);
         dateText = view.findViewById(R.id.dateText);
         btnSimpan = view.findViewById(R.id.btnSimpan);
+        barChartView = view.findViewById(R.id.barChartView);
 
-        // 🔹 Tampilkan hari & tanggal sekarang
-        String currentDate = new SimpleDateFormat("EEEE, dd MMMM yyyy", new Locale("id", "ID"))
-                .format(new Date());
+        // Tampilkan tanggal
+        String currentDate = new SimpleDateFormat("EEEE, dd MMMM yyyy", new Locale("id", "ID")).format(new Date());
         dateText.setText(currentDate);
 
-        // 🔹 Tambahkan emoji ke layout (dengan efek HD & 3D)
+        // Tambahkan emoji scroll
         for (String e : emojis) {
             TextView tv = new TextView(getContext());
             tv.setText(e);
             tv.setTextSize(32);
             tv.setTextColor(Color.parseColor("#55000000"));
             tv.setPadding(30, 0, 30, 0);
-
-            // 🟣 Efek 3D & HD tambahan
-            tv.setShadowLayer(12f, 0f, 6f, Color.argb(80, 0, 0, 0)); // bayangan lembut bawah
-            tv.setElevation(10f); // timbul (API 21+)
-            tv.setLetterSpacing(0.05f); // jarak antar emoji biar halus
-            tv.setLayerType(View.LAYER_TYPE_SOFTWARE, null); // aktifkan shadow
-
+            tv.setShadowLayer(12f, 0f, 6f, Color.argb(80,0,0,0));
+            tv.setElevation(10f);
+            tv.setLetterSpacing(0.05f);
+            tv.setLayerType(View.LAYER_TYPE_SOFTWARE,null);
             emojiContainer.addView(tv);
         }
 
-        // 🔹 Reaksi ketika digeser
         emojiScroll.getViewTreeObserver().addOnScrollChangedListener(this::updateEmojiSizes);
         emojiScroll.post(this::updateEmojiSizes);
 
-        // 🔹 Tombol simpan mood ke Firestore
         btnSimpan.setOnClickListener(v -> saveMood(selectedMood));
 
-        // 🔹 Load mood hari ini
         loadTodayMood();
+
+        // Grafik 6 mood terakhir user + emoji
+        float[] dataValues = {1, 4, 3, 6, 8, 5}; // skala 1-10
+        String[] dataLabels = {"Marah","Sedih","Biasa","Senang","Bahagia","Excited"};
+        String[] dataEmojis = {"😡","😞","😐","😊","😃","🤩"};
+
+        barChartView.setData(dataValues, dataLabels, dataEmojis);
 
         return view;
     }
 
     private void updateEmojiSizes() {
         int scrollX = emojiScroll.getScrollX();
-        int centerX = emojiScroll.getWidth() / 2;
+        int centerX = emojiScroll.getWidth()/2;
 
-        int closestIndex = 0;
-        int closestDistance = Integer.MAX_VALUE;
+        int closestIndex=0;
+        int closestDistance=Integer.MAX_VALUE;
 
-        for (int i = 0; i < emojiContainer.getChildCount(); i++) {
-            TextView v = (TextView) emojiContainer.getChildAt(i);
-            int viewCenter = (v.getLeft() + v.getRight()) / 2;
-            int distance = Math.abs(centerX + scrollX - viewCenter);
+        for(int i=0;i<emojiContainer.getChildCount();i++){
+            TextView v=(TextView)emojiContainer.getChildAt(i);
+            int viewCenter=(v.getLeft()+v.getRight())/2;
+            int distance=Math.abs(centerX+scrollX-viewCenter);
 
-            // 🔹 Skala nonlinear (tengah besar, pinggir kecil)
-            float normalized = Math.min(distance, 1000) / 1000f;
-            float scale = (float) Math.pow(1 - normalized, 2.8);
+            float normalized=Math.min(distance,1000)/1000f;
+            float scale=(float)Math.pow(1-normalized,2.8);
 
-            float size = 35 + (scale * 55); // 35–90sp
-            int alpha = (int) (60 + (scale * 195)); // makin tengah makin terang
+            float size=35+(scale*55);
+            int alpha=(int)(60+(scale*195));
 
-            // 🌈 Lengkung pelangi
-            float curveY = (float) Math.sin(normalized * Math.PI) * 80;
+            float curveY=(float)Math.sin(normalized*Math.PI)*80;
+            float shadow=12f*(1+scale);
 
-            // 💫 Efek 3D dinamis (makin tengah makin timbul)
-            float shadow = 12f * (1 + scale);
-            v.setShadowLayer(shadow, 0f, 6f, Color.argb((int) (100 * scale), 0, 0, 0));
-            v.setTranslationZ(scale * 10);
+            v.setShadowLayer(shadow,0f,6f,Color.argb((int)(100*scale),0,0,0));
+            v.setTranslationZ(scale*10);
             v.setTextSize(size);
-            v.setTextColor(Color.argb(alpha, 0, 0, 0));
+            v.setTextColor(Color.argb(alpha,0,0,0));
             v.setTranslationY(curveY);
 
-            if (distance < closestDistance) {
-                closestDistance = distance;
-                closestIndex = i;
+            if(distance<closestDistance){
+                closestDistance=distance;
+                closestIndex=i;
             }
         }
 
-        selectedIndex = closestIndex;
-        selectedMood = moods[selectedIndex];
+        selectedIndex=closestIndex;
+        selectedMood=moods[selectedIndex];
         moodText.setText(selectedMood);
     }
 
-    private void saveMood(String mood) {
-        String uid = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : null;
-        if (uid == null) {
-            Toast.makeText(getContext(), "User belum login", Toast.LENGTH_SHORT).show();
+    private void saveMood(String mood){
+        String uid=mAuth.getCurrentUser()!=null?mAuth.getCurrentUser().getUid():null;
+        if(uid==null){
+            Toast.makeText(getContext(),"User belum login",Toast.LENGTH_SHORT).show();
             return;
         }
 
-        String today = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
+        String today=new SimpleDateFormat("dd-MM-yyyy",Locale.getDefault()).format(new Date());
+        Map<String,Object> moodData=new HashMap<>();
+        moodData.put("date",today);
+        moodData.put("mood",mood);
 
-        Map<String, Object> moodData = new HashMap<>();
-        moodData.put("date", today);
-        moodData.put("mood", mood);
-
-        DocumentReference docRef = db.collection("Users")
-                .document(uid)
-                .collection("Mood")
-                .document(today);
-
+        DocumentReference docRef=db.collection("Users").document(uid).collection("Mood").document(today);
         docRef.set(moodData)
-                .addOnSuccessListener(aVoid -> Toast.makeText(getContext(), "Mood disimpan: " + mood, Toast.LENGTH_SHORT).show())
-                .addOnFailureListener(e -> Toast.makeText(getContext(), "Gagal menyimpan: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                .addOnSuccessListener(aVoid -> Toast.makeText(getContext(),"Mood disimpan: "+mood,Toast.LENGTH_SHORT).show())
+                .addOnFailureListener(e -> Toast.makeText(getContext(),"Gagal menyimpan: "+e.getMessage(),Toast.LENGTH_SHORT).show());
     }
 
-    private void loadTodayMood() {
-        String uid = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : null;
-        if (uid == null) return;
+    private void loadTodayMood(){
+        String uid=mAuth.getCurrentUser()!=null?mAuth.getCurrentUser().getUid():null;
+        if(uid==null) return;
 
-        String today = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
-
-        DocumentReference docRef = db.collection("Users")
-                .document(uid)
-                .collection("Mood")
-                .document(today);
-
+        String today=new SimpleDateFormat("dd-MM-yyyy",Locale.getDefault()).format(new Date());
+        DocumentReference docRef=db.collection("Users").document(uid).collection("Mood").document(today);
         docRef.get().addOnSuccessListener(documentSnapshot -> {
-            if (documentSnapshot.exists()) {
-                String mood = documentSnapshot.getString("mood");
-                moodText.setText("Mood kamu: " + mood);
+            if(documentSnapshot.exists()){
+                String mood=documentSnapshot.getString("mood");
+                moodText.setText("Mood kamu: "+mood);
             }
         });
     }

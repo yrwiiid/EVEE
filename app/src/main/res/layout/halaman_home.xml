@@ -1,188 +1,530 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFF7E6"
-    android:padding="16dp">
+    android:background="#FFF7E6">
 
-    <!-- Header -->
-    <TextView
-        android:id="@+id/textGreeting"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Halo, Intan!"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="#6A0D4A"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <TextView
-        android:id="@+id/textDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="09 Sept 2025"
-        android:textSize="14sp"
-        android:textColor="#B0AFAF"
-        android:layout_marginTop="4dp"
-        app:layout_constraintTop_toBottomOf="@id/textGreeting"
-        app:layout_constraintStart_toStartOf="@id/textGreeting" />
-
-    <!-- Horizontal Calendar -->
-    <HorizontalScrollView
-        android:id="@+id/horizontalCalendar"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:scrollbars="none"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/textDate"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <LinearLayout
-            android:id="@+id/calendarContainer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal" />
-    </HorizontalScrollView>
-
-    <!-- Container untuk dua card -->
     <LinearLayout
-        android:id="@+id/cardContainer"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="20dp"
-        app:layout_constraintTop_toBottomOf="@id/horizontalCalendar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <!-- Menstruasi Card -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:id="@+id/textGreeting"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Halo, Pengguna"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="#3F001D"
+                android:layout_alignParentStart="true"/>
+
+            <TextView
+                android:id="@+id/textDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="09 Okt 2025"
+                android:textSize="14sp"
+                android:textColor="#B0AFAF"
+                android:layout_below="@id/textGreeting"
+                android:layout_alignParentStart="true"/>
+
+            <ImageButton
+                android:id="@+id/iconNotification"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_notification"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:layout_centerVertical="true"
+                android:layout_toStartOf="@id/iconCalendar"
+                android:layout_marginEnd="16dp"
+                android:contentDescription="Notifikasi"/>
+
+            <ImageButton
+                android:id="@+id/iconCalendar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_calendar"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:contentDescription="Kalender"/>
+        </RelativeLayout>
+
+
+        <HorizontalScrollView
+            android:id="@+id/horizontalCalendar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:layout_marginBottom="24dp">
+
+            <LinearLayout
+                android:id="@+id/calendarContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
+
         <androidx.cardview.widget.CardView
             android:id="@+id/cardMenstruasi"
-            android:layout_width="0dp"
-            android:layout_height="250dp"
-            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             app:cardCornerRadius="16dp"
-            app:cardElevation="6dp"
-            app:cardBackgroundColor="#850E35"
-            android:layout_marginEnd="8dp">
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="#FBE7F2"
+            android:layout_marginBottom="16dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:padding="12dp">
+                android:padding="24dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Menstruasi dalam"
-                    android:textStyle="bold"
+                    android:text="Menstruasi ke"
                     android:textSize="14sp"
-                    android:textColor="#FFFFFF" />
+                    android:textColor="#3F001D"
+                    android:fontFamily="sans-serif-medium"/>
 
                 <TextView
                     android:id="@+id/textCycle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Belum ada data siklus"
-                    android:textSize="22sp"
+                    android:text="3 Hari"
+                    android:textSize="48sp"
                     android:textStyle="bold"
-                    android:textColor="#FFFFFF"
-                    android:layout_marginTop="6dp" />
+                    android:textColor="#850E35"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="4dp"/>
 
                 <TextView
+                    android:id="@+id/textCycleStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Siapkan pembalut di tasmu ya"
-                    android:textSize="12sp"
-                    android:textColor="#FBE7F2"
+                    android:text="Siklus saat ini : Menstruasi"
+                    android:textSize="14sp"
+                    android:textColor="#850E35"
                     android:gravity="center"
-                    android:layout_marginTop="4dp" />
+                    android:layout_marginBottom="12dp"/>
+
+                <Button
+                    android:id="@+id/buttonLogPeriod"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Catat periode"
+                    android:textColor="#FFFFFF"
+                    android:backgroundTint="#850E35"
+                    android:minHeight="0dp"
+                    android:paddingStart="24dp"
+                    android:paddingEnd="24dp"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"/>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Mood Card -->
         <androidx.cardview.widget.CardView
             android:id="@+id/cardMood"
-            android:layout_width="0dp"
-            android:layout_height="250dp"
-            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             app:cardCornerRadius="16dp"
-            app:cardElevation="6dp"
-            app:cardBackgroundColor="#FFFFFF"
-            android:layout_marginStart="8dp">
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="#F7D9E3"
+            android:layout_marginBottom="16dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:padding="12dp">
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="16dp">
 
-                <TextView
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Mood hari ini :"
-                    android:textColor="#6A0D4A"
-                    android:textSize="14sp" />
+                    android:orientation="vertical"
+                    android:gravity="center">
 
-                <TextView
-                    android:id="@+id/textMoodEmoji"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginVertical="6dp"
-                    android:text="😐"
-                    android:textSize="40sp" />
+                    <ImageView
+                        android:id="@+id/imageMoodIcon"
+                        android:layout_width="70dp"
+                        android:layout_height="70dp"
+                        android:src="@drawable/senang1"
+                        android:adjustViewBounds="true"
+                        android:scaleType="fitCenter"
+                        android:translationY="12dp"/> <!-- ditambahkan marginTop -->
 
-                <TextView
-                    android:id="@+id/textMoodDesc"
-                    android:layout_width="wrap_content"
+                    <Button
+                        android:id="@+id/buttonEditMood"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Edit mood"
+                        android:textColor="#FFFFFF"
+                        android:backgroundTint="#850E35"
+                        android:textSize="12sp"
+                        android:minHeight="0dp"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:paddingTop="10dp"
+                        android:paddingBottom="10dp"
+                        android:layout_marginTop="8dp"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Belum ada mood hari ini"
-                    android:textColor="#6A0D4A"
-                    android:textSize="14sp" />
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Mood hari ini :"
+                        android:textSize="14sp"
+                        android:textColor="#3F001D"
+                        android:layout_marginBottom="4dp"/>
+
+                    <TextView
+                        android:id="@+id/textMoodDesc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Senang"
+                        android:textSize="28sp"
+                        android:textStyle="bold"
+                        android:textColor="#3F001D"
+                        android:layout_marginBottom="4dp"/>
+
+                    <TextView
+                        android:id="@+id/textMoodComment"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Lanjutkan hal positif ya!"
+                        android:textSize="14sp"
+                        android:textColor="#850E35"/>
+                </LinearLayout>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
-    </LinearLayout>
 
-    <!-- Reminder -->
-    <LinearLayout
-        android:id="@+id/reminderLayout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="#F7D9E3"
-        android:padding="12dp"
-        android:layout_marginTop="20dp"
-        app:layout_constraintTop_toBottomOf="@id/cardContainer"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:cardCornerRadius="12dp">
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardReminder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="#FBE7F2"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Kegiatan dalam waktu dekat"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#3F001D"
+                    android:layout_marginBottom="12dp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="25 Agustus 2025"
+                        android:textSize="14sp"
+                        android:textColor="#850E35"
+                        android:layout_marginEnd="12dp"
+                        android:minWidth="100dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Penilaian tugas akhir kuliah"
+                        android:textSize="14sp"
+                        android:textColor="#3F001D"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="27 Agustus 2025"
+                        android:textSize="14sp"
+                        android:textColor="#850E35"
+                        android:layout_marginEnd="12dp"
+                        android:minWidth="100dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Rapat progress company organisasi"
+                        android:textSize="14sp"
+                        android:textColor="#3F001D"/>
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/buttonSeeReminder"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Lihat Remainder"
+                    android:textColor="#FFFFFF"
+                    android:backgroundTint="#850E35"
+                    android:minHeight="0dp"
+                    android:paddingStart="24dp"
+                    android:paddingEnd="24dp"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
+                    android:layout_gravity="end"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardCycleDetail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="#FBE7F2"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Siklus haid saya"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#3F001D"
+                    android:layout_marginBottom="12dp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingBottom="8dp"
+                    android:paddingTop="8dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Rata-rata siklus haid"
+                        android:textSize="14sp"
+                        android:textColor="#3F001D"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="28 hari"
+                        android:textSize="14sp"
+                        android:textColor="#3F001D"
+                        android:layout_marginEnd="8dp"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Normal"
+                        android:textSize="14sp"
+                        android:textColor="#5CB85C"/>
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_check_circle"
+                        android:layout_marginStart="4dp"
+                        android:contentDescription="Normal"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical" android:paddingBottom="8dp"
+                    android:paddingTop="8dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Rata-rata siklus haid"
+                        android:textSize="14sp"
+                        android:textColor="#3F001D"
+                        android:layout_gravity="center_vertical"/> <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="28 hari"
+                    android:textSize="14sp"
+                    android:textColor="#3F001D"
+                    android:layout_marginEnd="8dp"
+                    android:layout_gravity="center_vertical"/> <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Normal"
+                    android:textSize="14sp"
+                    android:textColor="#5CB85C"
+                    android:layout_gravity="center_vertical"/> <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_check_circle"
+                    android:layout_marginStart="4dp"
+                    android:layout_gravity="center_vertical" android:contentDescription="Normal"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical" android:paddingBottom="8dp"
+                    android:paddingTop="8dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Rata-rata durasi periode haid"
+                        android:textSize="14sp"
+                        android:textColor="#3F001D"
+                        android:layout_gravity="center_vertical"/> <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="8 hari"
+                        android:textSize="14sp"
+                        android:textColor="#3F001D"
+                        android:layout_marginEnd="8dp"
+                        android:layout_gravity="center_vertical"/> <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Normal"
+                        android:textSize="14sp"
+                        android:textColor="#5CB85C"
+                        android:layout_gravity="center_vertical"/> <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_check_circle"
+                        android:layout_marginStart="4dp"
+                        android:layout_gravity="center_vertical" android:contentDescription="Normal"/>
+                </LinearLayout>
+                <Button
+                    android:id="@+id/buttonEditCycle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Edit Siklus"
+                    android:textColor="#FFFFFF"
+                    android:backgroundTint="#850E35"
+                    android:minHeight="0dp"
+                    android:paddingStart="24dp"
+                    android:paddingEnd="24dp"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="12dp"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="2 hari lagi presentasi project workshop mobile!"
-            android:textColor="#6A0D4A"
+            android:text="Artikel berdasarkan siklus saat ini"
+            android:textSize="16sp"
             android:textStyle="bold"
-            android:textSize="14sp" />
+            android:textColor="#3F001D"
+            android:layout_marginBottom="12dp"/>
 
-        <TextView
-            android:layout_width="wrap_content"
+        <HorizontalScrollView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="H+2 hari, jangan lupa siapin obat pereda nyeri sebelum presentasi"
-            android:textColor="#6A0D4A"
-            android:textSize="12sp"
-            android:layout_marginTop="2dp" />
+            android:scrollbars="none">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="180dp"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="2dp"
+                    android:layout_marginEnd="8dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="120dp"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/article_dummy_1"
+                            android:contentDescription="Gambar Artikel"/>
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="8 Makanan Saat Haid yang Baik untuk Dikonsumsi"
+                            android:padding="8dp"
+                            android:textSize="12sp"
+                            android:textColor="#3F001D"/>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="180dp"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="2dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="120dp"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/article_dummy_2"
+                            android:contentDescription="Gambar Artikel"/>
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="8 Makanan untuk Siklus"
+                            android:padding="8dp"
+                            android:textSize="12sp"
+                            android:textColor="#3F001D"/>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="80dp"/>
+
     </LinearLayout>
-
-
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

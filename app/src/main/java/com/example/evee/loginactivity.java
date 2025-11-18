@@ -56,27 +56,38 @@ public class loginactivity extends AppCompatActivity {
                 return;
             }
 
-            // Opsi login admin manual
+            // Login Admin Manual
             if (emailText.equals("admin@silomba.com") && passwordText.equals("123456")) {
                 Toast.makeText(loginactivity.this, "Login sebagai Admin", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(loginactivity.this, dashboard.class));
+
+                // 🔥 Kirim sinyal agar popup muncul di dashboard/main
+                Intent i = new Intent(loginactivity.this, dashboard.class);
+                i.putExtra("showMoodPopup", true);
+                startActivity(i);
                 finish();
+
                 return;
             }
 
-            // Login dengan Firebase Authentication
+            // Login Firebase
             mAuth.signInWithEmailAndPassword(emailText, passwordText)
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             Toast.makeText(loginactivity.this, "Login berhasil", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(loginactivity.this, dashboard.class));
+
+                            // 🔥 Kirim sinyal popup
+                            Intent i = new Intent(loginactivity.this, dashboard.class);
+                            i.putExtra("showMoodPopup", true);
+                            startActivity(i);
                             finish();
+
                         } else {
-                            Toast.makeText(loginactivity.this, "Login gagal: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(loginactivity.this,
+                                    "Login gagal: " + task.getException().getMessage(),
+                                    Toast.LENGTH_SHORT).show();
                         }
                     });
         });
-
 
         // Link ke halaman register
         registerLink.setOnClickListener(v -> {
@@ -88,24 +99,31 @@ public class loginactivity extends AppCompatActivity {
             startActivity(new Intent(loginactivity.this, ForgotPasswordActivity.class));
         });
     }
+
     @Override
     protected void onStart() {
         super.onStart();
+
+        // Jika user sudah login → langsung ke dashboard
         if (mAuth.getCurrentUser() != null) {
+
             Intent intent = new Intent(loginactivity.this, dashboard.class);
+            intent.putExtra("showMoodPopup", true);  // 🔥 tetap kirim popup saat auto login
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+
             startActivity(intent);
-            finish(); // tutup login supaya tidak bisa kembali pakai tombol back
+            finish();
         }
     }
-
 
     @Override
     protected void onResume() {
         super.onResume();
-        // Kosongkan password setiap kali kembali ke halaman login
+
+        // Kosongkan password setiap kembali ke login
         password.setText("");
     }
+
     @Override
     protected void onStop() {
         super.onStop();
