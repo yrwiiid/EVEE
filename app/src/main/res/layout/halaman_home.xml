@@ -162,7 +162,7 @@
                         android:id="@+id/imageMoodIcon"
                         android:layout_width="70dp"
                         android:layout_height="70dp"
-                        android:src="@drawable/senang1"
+                        android:src="@drawable/bingung"
                         android:adjustViewBounds="true"
                         android:scaleType="fitCenter"
                         android:translationY="12dp"/> <!-- ditambahkan marginTop -->

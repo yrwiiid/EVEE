@@ -22,7 +22,7 @@
         android:id="@+id/titleMood"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Pilih Mood Kamu"
+        android:text="Mood kamu berubah ya? Yuk update biar aku tetap ngerti kamu 🌸"
         android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="#6A0D4A"

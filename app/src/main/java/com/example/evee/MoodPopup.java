@@ -23,24 +23,24 @@ public class MoodPopup {
 
     // Array untuk icon drawable (sesuaikan dengan nama file di drawable)
     private final int[] moodIcons = {
-            R.drawable.senang1,  // Senang
-            R.drawable.senang2,  // Senang
-            R.drawable.senang3,  // Senang
-            R.drawable.senang4,  // Senang
-            R.drawable.senang5,  // Senang
-            R.drawable.senang6,  // Senang
-            R.drawable.senang7,  // Senang
-            R.drawable.senang8,  // Senang
-            R.drawable.senang9,  // Senang
+            R.drawable.bingung,
+            R.drawable.semangat,
+            R.drawable.cemas,
+            R.drawable.lelah,
+            R.drawable.marah,
+            R.drawable.senang,
+            R.drawable.sedih,
+            R.drawable.percayadiri,
+            R.drawable.bosan,
             R.drawable.senang10, // Senang
             R.drawable.senang11, // Senang
             R.drawable.senang12  // Senang
     };
 
     private final String[] labels = {
-            "Senang", "Senang", "Senang",
-            "Senang", "Senang", "Senang",
-            "Senang", "Senang", "Senang",
+            "Bingung", "Semangat", "Cemas",
+            "Lemas", "Marah", "Senang",
+            "Sedih", "Percaya Diri", "Bosan",
             "Senang", "Senang", "Senang"
     };
 

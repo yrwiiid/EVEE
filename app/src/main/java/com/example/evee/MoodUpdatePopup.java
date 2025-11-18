@@ -22,23 +22,23 @@ public class MoodUpdatePopup {
 
     // Array untuk icon drawable (sesuaikan dengan nama file di drawable)
     private final int[] moodIcons = {
-            R.drawable.senang1,  // Senang
-            R.drawable.senang2,  // Senang
-            R.drawable.senang3,  // Senang
-            R.drawable.senang4,  // Senang
-            R.drawable.senang5,  // Senang
-            R.drawable.senang6,  // Senang
-            R.drawable.senang7,  // Senang
-            R.drawable.senang8,  // Senang
-            R.drawable.senang9,  // Senang
+            R.drawable.bingung,
+            R.drawable.semangat,
+            R.drawable.cemas,
+            R.drawable.lelah,
+            R.drawable.marah,
+            R.drawable.senang,
+            R.drawable.sedih,
+            R.drawable.percayadiri,
+            R.drawable.bosan,
             R.drawable.senang10, // Senang
             R.drawable.senang11, // Senang
             R.drawable.senang12  // Senang
     };
 
     private final String[] labels = {
-            "Marah","Sedih","Biasa","Cukup Senang","Senang","Bahagia",
-            "Lucu","Excited","Cinta","Manja","Ngantuk","Sedih Banget"
+            "Bingung","Semangat","Cemas","Lelah","Marah","Senang",
+            "Sedih","Percaya Diri","Bosan","Manja","Ngantuk","Sedih Banget"
     };
 
     public MoodUpdatePopup(Context c, OnMoodSavedListener l) {

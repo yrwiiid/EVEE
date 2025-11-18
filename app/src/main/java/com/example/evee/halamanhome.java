@@ -8,7 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.cardview.widget.CardView;
-import android.widget.Button; // Tambahkan import Button
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -35,7 +35,8 @@ public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSaved
     private ImageView imageMoodIcon;
     private LinearLayout calendarContainer;
     private CardView cardMood;
-    private Button buttonEditMood; // Tambahkan Button Edit Mood
+    private Button buttonEditMood; // Tombol edit mood
+    private Button buttonLogPeriod; // Tombol "Catat periode" untuk buka kalender
 
     private FirebaseAuth mAuth;
     private FirebaseFirestore firestore;
@@ -43,30 +44,28 @@ public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSaved
     private final SimpleDateFormat displaySdf = new SimpleDateFormat("dd MMM", Locale.getDefault()); // Untuk tanggal tampilan
 
     // Pastikan urutan gambar sesuai urutan labels yang dipakai di popup
-    // (Array moodImages dan labels tidak berubah)
     private final int[] moodImages = {
-            R.drawable.senang1, R.drawable.senang2, R.drawable.senang3, R.drawable.senang4,
-            R.drawable.senang5, R.drawable.senang6, R.drawable.senang7, R.drawable.senang8,
-            R.drawable.senang9, R.drawable.senang10, R.drawable.senang11, R.drawable.senang12
+            R.drawable.bingung, R.drawable.semangat, R.drawable.cemas, R.drawable.lelah,
+            R.drawable.marah, R.drawable.senang, R.drawable.sedih, R.drawable.percayadiri,
+            R.drawable.bosan, R.drawable.senang10, R.drawable.senang11, R.drawable.senang12
     };
     private final String[] labels = {
-            "Marah","Sedih","Biasa","Cukup Senang","Senang","Bahagia",
-            "Lucu","Excited","Cinta","Manja","Ngantuk","Sedih Banget"
+            "Bingung","Semangat","Cemas","Lelah","Marah","Senang",
+            "Sedih","Percaya Diri","Bosan","Manja","Ngantuk","Sedih Banget"
     };
-    // Tambahkan komentar mood (sesuaikan dengan array labels di atas)
     private final String[] moodComments = {
-            "Ayo tenangkan diri sejenak.",
-            "Semoga hari ini membaik ya.",
-            "Semangat menjalani hari!",
-            "Hari yang menyenangkan!",
-            "Lanjutkan hal positif ya!",
-            "Nikmati kebahagiaanmu!",
-            "Ada-ada saja ya!",
-            "Siap untuk petualangan baru!",
-            "Cinta diri sendiri dulu ya!",
-            "Jangan sampai lelah ya.",
-            "Istirahat sebentar yuk.",
-            "Peluk jauh untukmu!"
+            "Waduh, jangan bingung ya, tarik napas dulu~",
+            "Ayo semangat! Kamu pasti bisa!",
+            "Tenang, cemasnya hilang kalau kita senyum :)",
+            "Lelah ya? Yuk istirahat sebentar~",
+            "Ups, marah-marah nggak asik, yuk tarik napas!",
+            "Yeay, senangnya ketemu hari yang ceria!",
+            "Sedih ya? Peluk hangat buatmu 💛",
+            "Percaya diri dong! Kamu hebat kok!",
+            "Bosan? Yuk cari hal seru!",
+            "Manja boleh, tapi jangan lupa senyum ya~",
+            "Ngantuk? Tidur sebentar biar segar lagi!",
+            "Sedih banget? Tenang, semuanya akan baik-baik saja!"
     };
 
 
@@ -88,8 +87,9 @@ public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSaved
         calendarContainer = view.findViewById(R.id.calendarContainer);
         cardMood = view.findViewById(R.id.cardMood);
         buttonEditMood = view.findViewById(R.id.buttonEditMood); // ID Baru
+        buttonLogPeriod = view.findViewById(R.id.buttonLogPeriod); // Tombol "Catat periode" di XML
 
-        // Inisialisasi Firebase... (Tidak Berubah)
+        // Inisialisasi Firebase
         mAuth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
 
@@ -146,7 +146,27 @@ public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSaved
         };
 
         // Ganti CardView.setOnClickListener dengan Button.setOnClickListener
-        buttonEditMood.setOnClickListener(moodClickListener);
+        if (buttonEditMood != null) buttonEditMood.setOnClickListener(moodClickListener);
+
+        // ======= NAVIGASI: Tombol "Catat periode" -> buka halaman kalender =======
+        if (buttonLogPeriod != null) {
+            buttonLogPeriod.setOnClickListener(v -> {
+                // Ganti fragment ke halamancalendar
+                try {
+                    // Pastikan menggunakan supportFragmentManager dari activity
+                    requireActivity().getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.nav_host_fragment, new halamancalendar())
+                            .addToBackStack(null)
+                            .commit();
+                } catch (IllegalStateException ise) {
+                    // Jika fragment manager tidak tersedia, tampilkan toast
+                    Toast.makeText(getContext(), "Tidak dapat membuka kalender saat ini.", Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    Toast.makeText(getContext(), "Terjadi kesalahan: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
 
         return view;
     }
@@ -231,40 +251,29 @@ public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSaved
                                     Date startDate = sdf.parse(startDateStr);
                                     Calendar today = Calendar.getInstance();
 
-                                    // Hitung perbedaan hari dalam milidetik
                                     long diffMillis = today.getTimeInMillis() - startDate.getTime();
                                     long diffDays = diffMillis / (1000 * 60 * 60 * 24);
 
-                                    // Lakukan pengecekan siklus
                                     if (diffDays >= 0 && diffDays < avgDuration) {
-                                        // Sedang menstruasi (hari ke-1 sampai hari ke-avgDuration)
                                         textCycle.setText(String.valueOf(diffDays + 1) + " Hari");
                                         textCycleStatus.setText("Siklus saat ini : Menstruasi");
                                     } else {
-                                        // Hitung siklus berikutnya
                                         Calendar nextStart = Calendar.getInstance();
                                         nextStart.setTime(startDate);
 
-                                        // Majukan ke siklus yang sudah lewat atau sama dengan hari ini
                                         while (nextStart.before(today)) {
                                             nextStart.add(Calendar.DAY_OF_MONTH, avgCycle);
                                         }
 
-                                        // Hitung sisa hari menuju nextStart
                                         long remainingDays = (nextStart.getTimeInMillis() - today.getTimeInMillis()) / (1000 * 60 * 60 * 24);
 
-                                        // Jika sisa hari <= 0, hitung lagi (seharusnya tidak terjadi jika di-loop di atas)
                                         if (remainingDays <= 0) {
                                             nextStart.add(Calendar.DAY_OF_MONTH, avgCycle);
                                             remainingDays = (nextStart.getTimeInMillis() - today.getTimeInMillis()) / (1000 * 60 * 60 * 24);
                                         }
 
-                                        // Set tampilan
                                         textCycle.setText(String.valueOf(remainingDays) + " Hari Lagi");
                                         textCycleStatus.setText("Siklus saat ini : Menuju Menstruasi");
-
-                                        // (Anda bisa menambahkan logika masa subur di sini, tapi saya hanya berfokus pada Menstruasi/Menuju)
-
                                     }
                                 } catch (Exception e) {
                                     textCycle.setText("Error");
@@ -296,7 +305,6 @@ public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSaved
                         textMoodDesc.setText(mood != null ? mood : "Mood Hari Ini");
                         textMoodComment.setText(getCommentForLabel(mood)); // Set komentar
 
-                        // tampilkan gambar sesuai mood (jika tersedia)
                         int resId = getDrawableForLabel(mood);
                         if (resId != 0) {
                             imageMoodIcon.setImageResource(resId);
@@ -312,12 +320,12 @@ public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSaved
                 });
     }
 
-
-
     // =====================================================================================
     // GENERATE KALENDER (Telah Diperbaiki untuk Posisi Tengah)
     // =====================================================================================
     private void generateCalendar() {
+        if (calendarContainer == null) return;
+
         calendarContainer.removeAllViews();
 
         Calendar now = Calendar.getInstance();
@@ -328,14 +336,13 @@ public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSaved
             int day = calendar.get(Calendar.DAY_OF_MONTH);
             String dayName = new SimpleDateFormat("EEE", Locale.getDefault()).format(calendar.getTime());
 
-            // Parent container untuk setiap hari
             LinearLayout dayBox = new LinearLayout(getContext());
             dayBox.setOrientation(LinearLayout.VERTICAL);
-            dayBox.setGravity(Gravity.CENTER); // Memastikan semua konten berada di tengah vertikal dan horizontal dayBox
+            dayBox.setGravity(Gravity.CENTER);
 
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                    (int) (48 * getResources().getDisplayMetrics().density), // Lebar tetap yang cukup
-                    (int) (65 * getResources().getDisplayMetrics().density) // Tinggi tetap yang cukup
+                    (int) (48 * getResources().getDisplayMetrics().density),
+                    (int) (65 * getResources().getDisplayMetrics().density)
             );
 
             params.setMargins(8, 0, 8, 0);
@@ -350,13 +357,11 @@ public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSaved
             }
             dayBox.setClipToOutline(true);
 
-            // Layout params untuk TextView: MATCH_PARENT agar mengisi lebar dayBox
             LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
             );
 
-            // TextView Day Name (M, S, J, K, etc.)
             TextView dayText = new TextView(getContext());
             dayText.setText(dayName.substring(0, 1).toUpperCase(Locale.getDefault()));
             dayText.setTextSize(14);
@@ -364,10 +369,9 @@ public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSaved
                     (calendar.get(Calendar.DAY_OF_MONTH) == now.get(Calendar.DAY_OF_MONTH) &&
                             calendar.get(Calendar.MONTH) == now.get(Calendar.MONTH))
                             ? "#FFFFFF" : "#6A0D4A"));
-            dayText.setGravity(Gravity.CENTER_HORIZONTAL); // Pusatkan teks di dalamnya
+            dayText.setGravity(Gravity.CENTER_HORIZONTAL);
             dayText.setLayoutParams(tvParams);
 
-            // TextView Day Number (16, 17, 18, etc.)
             TextView dayNumber = new TextView(getContext());
             dayNumber.setText(String.valueOf(day));
             dayNumber.setTextSize(16);
@@ -376,7 +380,7 @@ public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSaved
                     (calendar.get(Calendar.DAY_OF_MONTH) == now.get(Calendar.DAY_OF_MONTH) &&
                             calendar.get(Calendar.MONTH) == now.get(Calendar.MONTH))
                             ? "#FFFFFF" : "#6A0D4A"));
-            dayNumber.setGravity(Gravity.CENTER_HORIZONTAL); // Pusatkan angka di dalamnya
+            dayNumber.setGravity(Gravity.CENTER_HORIZONTAL);
             dayNumber.setLayoutParams(tvParams);
 
             dayBox.addView(dayText);
@@ -387,8 +391,6 @@ public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSaved
             calendar.add(Calendar.DAY_OF_MONTH, 1);
         }
     }
-
-
 
     // =====================================================================================
     // CALLBACK DARI MoodUpdatePopup (Diperbarui untuk tampilan baru)
