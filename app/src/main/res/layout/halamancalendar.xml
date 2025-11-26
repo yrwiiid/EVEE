@@ -1,50 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#fff5e4"
     android:padding="16dp">
 
-    <!-- Judul Halaman -->
-    <TextView
-        android:id="@+id/txtTitleCalendar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Kalender Menstruasi"
-        android:textColor="#850E35"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_gravity="center_horizontal"
-        android:paddingBottom="12dp" />
-
-    <!-- Material CalendarView -->
-    <com.prolificinteractive.materialcalendarview.MaterialCalendarView
-        android:id="@+id/calendarView"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:mcv_showOtherDates="all"
-        app:mcv_firstDayOfWeek="monday"
-        app:mcv_selectionColor="@color/purple_500"
-        app:mcv_headerTextAppearance="@style/TextAppearance.AppCompat.Large"
-        app:mcv_dateTextAppearance="@style/TextAppearance.AppCompat.Medium" />
+        android:layout_height="match_parent">
 
-    <!-- Teks Rentang yang Dipilih -->
-    <TextView
-        android:id="@+id/textSelectedRange"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Belum ada tanggal dipilih"
-        android:textSize="16sp"
-        android:layout_marginTop="12dp"
-        android:layout_gravity="center_horizontal" />
+        <!-- Judul Halaman -->
+        <TextView
+            android:id="@+id/txtTitleCalendar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Kalender Menstruasi"
+            android:textColor="#850E35"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_gravity="center_horizontal"
+            android:paddingBottom="12dp" />
 
-    <!-- Tombol Simpan / Tandai -->
-    <Button
-        android:id="@+id/btnSavePeriod"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Tandai Sebagai Hari Haid"
-        android:layout_marginTop="16dp"/>
-</LinearLayout>
+        <com.prolificinteractive.materialcalendarview.MaterialCalendarView
+            android:id="@+id/calendarView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:mcv_showOtherDates="all"
+            app:mcv_firstDayOfWeek="monday"
+            app:mcv_selectionColor="@color/purple_500"
+            app:mcv_headerTextAppearance="@style/TextAppearance.AppCompat.Large"
+            app:mcv_dateTextAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+        <TextView
+            android:id="@+id/textSelectedRange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Belum ada tanggal dipilih"
+            android:textSize="16sp"
+            android:layout_marginTop="12dp"
+            android:layout_gravity="center_horizontal" />
+
+        <Button
+            android:id="@+id/btnSavePeriod"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tandai Sebagai Hari Haid"
+            android:layout_marginTop="16dp"/>
+
+        <Button
+            android:id="@+id/btnDeletePeriod"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Hapus Tanda Haid"
+            android:layout_marginTop="16dp"/>
+
+        <LinearLayout
+            android:id="@+id/layoutNotes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="20dp">
+
+            <TextView
+                android:id="@+id/txtTitleNotes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Catatan Reminder"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:textColor="#850E35"
+                android:layout_marginBottom="12dp" />
+
+            <LinearLayout
+                android:id="@+id/listNotes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- BUTTON TAMBAH CATATAN DI BAWAH -->
+    <ImageButton
+        android:id="@+id/btnAddNote"
+        android:layout_width="65dp"
+        android:layout_height="65dp"
+        android:layout_gravity="center|bottom"
+        android:layout_marginBottom="5dp"
+        android:background="@drawable/bg_add_note"
+        android:src="@drawable/ic_add"
+        android:contentDescription="Tambah Catatan" />
+
+</FrameLayout>
