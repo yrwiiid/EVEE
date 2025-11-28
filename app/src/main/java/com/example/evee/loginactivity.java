@@ -104,7 +104,7 @@ public class loginactivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        // Jika user sudah login → langsung ke dashboard
+//         Jika user sudah login → langsung ke dashboard
         if (mAuth.getCurrentUser() != null) {
 
             Intent intent = new Intent(loginactivity.this, dashboard.class);

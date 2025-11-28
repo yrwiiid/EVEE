@@ -15,6 +15,9 @@
         <activity android:name=".dashboard" />
 
         <activity android:name=".Halaman_Artikel" />
+
+        <activity android:name=".MenstruasiActivity" />
+
         <activity android:name=".SavedArtikelActivity" />
 
 
