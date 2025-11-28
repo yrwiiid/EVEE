@@ -24,7 +24,7 @@ public class ScreeningFragment extends Fragment {
             "Kapan hari terakhir menstruasi anda?",
             "Biasanya, berapa lama menstruasi anda berlangsung setiap bulan?",
             "Biasanya, berapa panjang siklus mesnstruasi anda?",
-            "Apakah siklus menstruasi anda teratur?"
+            "Apakah siklus menstruasi anda teratur?",
             "Seberapa tingkat nyeri menstruasi yang Anda rasakan?"
     };
 
