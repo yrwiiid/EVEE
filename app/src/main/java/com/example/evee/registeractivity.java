@@ -94,13 +94,26 @@ public class registeractivity extends AppCompatActivity {
 
                             dbRef.child("Users").child(userId).setValue(user)
                                     .addOnSuccessListener(unused -> {
+//                                        Toast.makeText(registeractivity.this,
+//                                                "Register berhasil! Silakan login.",
+//                                                Toast.LENGTH_SHORT).show();
+//
+//                                        // Pindah ke login
+//                                        startActivity(new Intent(registeractivity.this, MenstruasiActivity.class));
+//                                        finish();
                                         Toast.makeText(registeractivity.this,
-                                                "Register berhasil! Silakan login.",
+                                                "Register berhasil! Silakan isi skrining terlebih dahulu.",
                                                 Toast.LENGTH_SHORT).show();
 
-                                        // Pindah ke login
-                                        startActivity(new Intent(registeractivity.this, loginactivity.class));
+// Logout dulu, supaya tidak auto-login ke dashboard
+//                                        FirebaseAuth.getInstance().signOut();
+
+// Arahkan ke halaman skrining
+                                        Intent i = new Intent(registeractivity.this, MenstruasiActivity.class);
+                                        startActivity(i);
                                         finish();
+
+
                                     })
                                     .addOnFailureListener(e -> {
                                         Toast.makeText(registeractivity.this,

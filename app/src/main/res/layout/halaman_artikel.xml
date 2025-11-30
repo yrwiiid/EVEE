@@ -33,6 +33,20 @@
         app:layout_constraintTop_toTopOf="@id/judul"
         app:layout_constraintEnd_toEndOf="parent" />
 
+
+    <ImageView
+        android:id="@+id/simpanuatama"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_simpan_filled"
+        app:tint="#6A0D4A"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintTop_toTopOf="@id/judul"
+        app:layout_constraintEnd_toStartOf="@id/filter" />
+
+
+
     <!-- Search Bar -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/searchBar"
@@ -95,7 +109,8 @@
                 android:padding="10dp"
                 android:layout_marginBottom="10dp">
 
-                <ImageView
+
+            <ImageView
                     android:id="@+id/imgArtikel1"
                     android:layout_width="70dp"
                     android:layout_height="70dp"
@@ -121,7 +136,7 @@
                     android:id="@+id/info1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="2 hari lalu • 5 min read"
+                    android:text="2 hari lalu"
                     android:textColor="#777"
                     android:textSize="12sp"
                     app:layout_constraintStart_toStartOf="@id/judulartikel"
@@ -131,10 +146,10 @@
                     android:id="@+id/simpan"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/simpanartikel"
+                    android:src="@drawable/ic_simpan_outline"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:tint="#A31641" />
+                    app:tint="#6A0D4A" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <!-- Card Artikel 2 -->
@@ -171,7 +186,7 @@
                     android:id="@+id/info2"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="3 hari lalu • 4 min read"
+                    android:text="3 hari lalu"
                     android:textColor="#777"
                     android:textSize="12sp"
                     app:layout_constraintStart_toStartOf="@id/judulartikel2"
@@ -181,7 +196,7 @@
                     android:id="@+id/simpan2"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/simpanartikel"
+                    android:src="@drawable/ic_simpan_outline"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:tint="#6A0D4A" />
@@ -220,7 +235,7 @@
                     android:id="@+id/info3"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="3 hari lalu • 4 min read"
+                    android:text="3 hari lalu"
                     android:textColor="#777"
                     android:textSize="12sp"
                     app:layout_constraintStart_toStartOf="@id/judulartikel3"
@@ -230,7 +245,7 @@
                     android:id="@+id/simpan3"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/simpanartikel"
+                    android:src="@drawable/ic_simpan_outline"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:tint="#6A0D4A" />
