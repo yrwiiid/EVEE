@@ -1,0 +1,8 @@
+<resources>
+    <string-array name="days_before_array">
+        <item>1 hari</item>
+        <item>2 hari</item>
+        <item>3 hari</item>
+        <item>5 hari</item>
+    </string-array>
+</resources>

@@ -33,6 +33,9 @@ android {
 }
 
 dependencies {
+    implementation("com.android.volley:volley:1.2.1")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("com.prolificinteractive:material-calendarview:1.4.3")
     implementation("androidx.cardview:cardview:1.0.0")
     implementation(platform("com.google.firebase:firebase-bom:34.2.0"))

@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.evee">
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:theme="@style/Theme.EVEE"
         android:allowBackup="true"
@@ -13,8 +15,6 @@
 
         <!-- Main Activity -->
         <activity android:name=".dashboard" />
-
-        <activity android:name=".Halaman_Artikel" />
 
         <activity android:name=".MenstruasiActivity" />
 
