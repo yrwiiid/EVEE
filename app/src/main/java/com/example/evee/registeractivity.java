@@ -10,19 +10,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserProfileChangeRequest;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 public class registeractivity extends AppCompatActivity {
 
     private TextInputEditText edtName, edtEmail, edtPassword, edtConfirmPassword;
     private MaterialButton buttonRegister;
-
-    private FirebaseAuth mAuth;
-    private DatabaseReference dbRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,23 +31,17 @@ public class registeractivity extends AppCompatActivity {
         TextView textViewLogin = findViewById(R.id.textViewLogin);
         textViewLogin.setOnClickListener(v -> {
             startActivity(new Intent(registeractivity.this, loginactivity.class));
-            finish(); // supaya tidak bisa balik ke register dengan tombol back
+            finish();
         });
 
-        // Firebase Auth & Database
-        mAuth = FirebaseAuth.getInstance();
-        dbRef = FirebaseDatabase.getInstance()
-                .getReferenceFromUrl("https://evee-aee6e-default-rtdb.firebaseio.com/");
-
-        // Tombol register
         buttonRegister.setOnClickListener(v -> registerUser());
     }
 
     private void registerUser() {
-        String name = edtName.getText().toString().trim();
-        String email = edtEmail.getText().toString().trim();
-        String password = edtPassword.getText().toString().trim();
-        String confirmPassword = edtConfirmPassword.getText().toString().trim();
+        String name = edtName.getText() != null ? edtName.getText().toString().trim() : "";
+        String email = edtEmail.getText() != null ? edtEmail.getText().toString().trim() : "";
+        String password = edtPassword.getText() != null ? edtPassword.getText().toString().trim() : "";
+        String confirmPassword = edtConfirmPassword.getText() != null ? edtConfirmPassword.getText().toString().trim() : "";
 
         // Validasi input
         if (TextUtils.isEmpty(name)) {
@@ -75,72 +61,15 @@ public class registeractivity extends AppCompatActivity {
             return;
         }
 
-        // Buat user dengan Firebase Authentication
-        mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        FirebaseUser firebaseUser = mAuth.getCurrentUser();
-                        if (firebaseUser != null) {
-                            // Update profile FirebaseAuth (set display name)
-                            UserProfileChangeRequest profileUpdates =
-                                    new UserProfileChangeRequest.Builder()
-                                            .setDisplayName(name)
-                                            .build();
-                            firebaseUser.updateProfile(profileUpdates);
+        // Karena tidak ada Firebase & tidak ada Retrofit,
+        // cukup tampilkan toast sukses sementara
+        Toast.makeText(this,
+                "Validasi berhasil! (Belum tersambung ke server)",
+                Toast.LENGTH_SHORT).show();
 
-                            // Simpan ke Realtime Database (Users/UID)
-                            String userId = firebaseUser.getUid();
-                            User user = new User(name, email);
-
-                            dbRef.child("Users").child(userId).setValue(user)
-                                    .addOnSuccessListener(unused -> {
-//                                        Toast.makeText(registeractivity.this,
-//                                                "Register berhasil! Silakan login.",
-//                                                Toast.LENGTH_SHORT).show();
-//
-//                                        // Pindah ke login
-//                                        startActivity(new Intent(registeractivity.this, MenstruasiActivity.class));
-//                                        finish();
-                                        Toast.makeText(registeractivity.this,
-                                                "Register berhasil! Silakan isi skrining terlebih dahulu.",
-                                                Toast.LENGTH_SHORT).show();
-
-// Logout dulu, supaya tidak auto-login ke dashboard
-//                                        FirebaseAuth.getInstance().signOut();
-
-// Arahkan ke halaman skrining
-                                        Intent i = new Intent(registeractivity.this, MenstruasiActivity.class);
-                                        startActivity(i);
-                                        finish();
-
-
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        Toast.makeText(registeractivity.this,
-                                                "Gagal simpan data: " + e.getMessage(),
-                                                Toast.LENGTH_SHORT).show();
-                                    });
-                        }
-                    } else {
-                        Toast.makeText(registeractivity.this,
-                                "Register gagal: " + task.getException().getMessage(),
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
-    }
-
-    // Model User (nama + email)
-    public static class User {
-        public String name;
-        public String email;
-
-        public User() {
-            // Default constructor dibutuhkan Firebase
-        }
-
-        public User(String name, String email) {
-            this.name = name;
-            this.email = email;
-        }
+        // Pindah ke halaman selanjutnya
+        Intent i = new Intent(registeractivity.this, MenstruasiActivity.class);
+        startActivity(i);
+        finish();
     }
 }

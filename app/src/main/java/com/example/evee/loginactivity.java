@@ -7,23 +7,16 @@ import android.widget.*;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.firebase.auth.FirebaseAuth;
-
 public class loginactivity extends AppCompatActivity {
 
     private EditText email, password;
     private Button loginBtn;
     private TextView registerLink, forgotPasswordLink;
 
-    private FirebaseAuth mAuth;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
-        // Inisialisasi FirebaseAuth
-        mAuth = FirebaseAuth.getInstance();
 
         // Inisialisasi view
         email = findViewById(R.id.editTextEmail);
@@ -32,7 +25,6 @@ public class loginactivity extends AppCompatActivity {
         registerLink = findViewById(R.id.textViewRegister);
         forgotPasswordLink = findViewById(R.id.textViewForgotPassword);
 
-        // Login button
         loginBtn.setOnClickListener(v -> {
             String emailText = email.getText().toString().trim();
             String passwordText = password.getText().toString().trim();
@@ -56,76 +48,40 @@ public class loginactivity extends AppCompatActivity {
                 return;
             }
 
-            // Login Admin Manual
+            // Login Admin Manual (opsional)
             if (emailText.equals("admin@silomba.com") && passwordText.equals("123456")) {
                 Toast.makeText(loginactivity.this, "Login sebagai Admin", Toast.LENGTH_SHORT).show();
 
-                // 🔥 Kirim sinyal agar popup muncul di dashboard/main
                 Intent i = new Intent(loginactivity.this, dashboard.class);
                 i.putExtra("showMoodPopup", true);
                 startActivity(i);
                 finish();
-
                 return;
             }
 
-            // Login Firebase
-            mAuth.signInWithEmailAndPassword(emailText, passwordText)
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            Toast.makeText(loginactivity.this, "Login berhasil", Toast.LENGTH_SHORT).show();
+            // Karena Firebase sudah dihapus → sementara anggap login sukses
+            Toast.makeText(loginactivity.this,
+                    "Login berhasil (belum tersambung ke server)",
+                    Toast.LENGTH_SHORT).show();
 
-                            // 🔥 Kirim sinyal popup
-                            Intent i = new Intent(loginactivity.this, dashboard.class);
-                            i.putExtra("showMoodPopup", true);
-                            startActivity(i);
-                            finish();
-
-                        } else {
-                            Toast.makeText(loginactivity.this,
-                                    "Login gagal: " + task.getException().getMessage(),
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    });
-        });
-
-        // Link ke halaman register
-        registerLink.setOnClickListener(v -> {
-            startActivity(new Intent(loginactivity.this, registeractivity.class));
-        });
-
-        // Link ke halaman lupa password
-        forgotPasswordLink.setOnClickListener(v -> {
-            startActivity(new Intent(loginactivity.this, ForgotPasswordActivity.class));
-        });
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-//         Jika user sudah login → langsung ke dashboard
-        if (mAuth.getCurrentUser() != null) {
-
-            Intent intent = new Intent(loginactivity.this, dashboard.class);
-            intent.putExtra("showMoodPopup", true);  // 🔥 tetap kirim popup saat auto login
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-
-            startActivity(intent);
+            Intent i = new Intent(loginactivity.this, dashboard.class);
+            i.putExtra("showMoodPopup", true);
+            startActivity(i);
             finish();
-        }
+        });
+
+        registerLink.setOnClickListener(v ->
+                startActivity(new Intent(loginactivity.this, registeractivity.class))
+        );
+
+        forgotPasswordLink.setOnClickListener(v ->
+                startActivity(new Intent(loginactivity.this, ForgotPasswordActivity.class))
+        );
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-        // Kosongkan password setiap kembali ke login
         password.setText("");
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
     }
 }

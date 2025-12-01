@@ -18,28 +18,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
 public class halamanprofil extends Fragment {
 
     private static final String TAG = "HalamanProfil";
 
     private Button btnEditProfile, btnLogout;
-    private LinearLayout menuNotification, menuSiklus, menuTransfer, menuSettings; // ✅ tambahkan menuSettings
+    private LinearLayout menuNotification, menuSiklus, menuTransfer, menuSettings;
     private TextView tvNama, tvUsername;
     private ImageView imgProfile;
 
-    private FirebaseAuth mAuth;
-    private DatabaseReference dbRef;
-
     public halamanprofil() {
-        // Konstruktor kosong wajib untuk Fragment
+        // Konstruktor kosong wajib
     }
 
     @Nullable
@@ -58,22 +47,12 @@ public class halamanprofil extends Fragment {
         menuNotification = view.findViewById(R.id.menuNotification);
         menuSiklus = view.findViewById(R.id.menuSiklus);
         menuTransfer = view.findViewById(R.id.menuTransfer);
-        menuSettings = view.findViewById(R.id.menuSettings); // ✅ inisialisasi pengaturan
+        menuSettings = view.findViewById(R.id.menuSettings);
 
-        // Firebase
-        mAuth = FirebaseAuth.getInstance();
-        dbRef = FirebaseDatabase.getInstance().getReference("Users");
+        // Load data user dari sharedprefs / server MySQL
+        loadUserDataFromServer();
 
-        // Ambil data user aktif
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user != null) {
-            loadUserData(user.getUid());
-        } else {
-            tvNama.setText("User tidak login");
-            tvUsername.setText("-");
-        }
-
-        // 🔹 Edit Profil -> Ganti fragment
+        // Tombol Edit Profil
         btnEditProfile.setOnClickListener(v -> {
             halamaneditprofil editProfilFragment = new halamaneditprofil();
             requireActivity().getSupportFragmentManager()
@@ -83,22 +62,19 @@ public class halamanprofil extends Fragment {
                     .commit();
         });
 
-        // 🔹 Logout
+        // Tombol Logout
         btnLogout.setOnClickListener(v -> doLogout());
 
-        // 🔹 Menu Notification
+        // Menu lainnya
         menuNotification.setOnClickListener(v ->
                 Toast.makeText(requireActivity(), "Menu Notification diklik", Toast.LENGTH_SHORT).show());
 
-        // 🔹 Menu Siklus
         menuSiklus.setOnClickListener(v ->
                 Toast.makeText(requireActivity(), "Menu Siklus diklik", Toast.LENGTH_SHORT).show());
 
-        // 🔹 Menu Transfer
         menuTransfer.setOnClickListener(v ->
                 Toast.makeText(requireActivity(), "Menu Transfer diklik", Toast.LENGTH_SHORT).show());
 
-        // 🔹 Menu Pengaturan (buka halaman pengaturan)
         menuSettings.setOnClickListener(v -> {
             halamansettings settingsFragment = new halamansettings();
             requireActivity().getSupportFragmentManager()
@@ -111,34 +87,31 @@ public class halamanprofil extends Fragment {
         return view;
     }
 
-    private void loadUserData(String uid) {
-        dbRef.child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    String nama = snapshot.child("name").getValue(String.class);
-                    String username = snapshot.child("username").getValue(String.class);
+    // ====================================
+    //   GANTI DENGAN MYSQL NANTI
+    // ====================================
+    private void loadUserDataFromServer() {
+        // NANTI ambil dari server MySQL via HTTP
+        // Contoh ambil dari SharedPreferences sementara
 
-                    tvNama.setText(nama != null ? nama : "Nama tidak tersedia");
-                    tvUsername.setText(username != null ? username : "-");
-                } else {
-                    tvNama.setText("Data tidak ditemukan");
-                    tvUsername.setText("-");
-                }
-            }
+        SharedPreferences prefs = requireActivity()
+                .getSharedPreferences("USER_PREFS", Context.MODE_PRIVATE);
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG, "Gagal ambil data: " + error.getMessage());
-            }
-        });
+        String nama = prefs.getString("nama", "Nama User");
+        String username = prefs.getString("username", "username");
+
+        tvNama.setText(nama);
+        tvUsername.setText(username);
+
+        Log.d(TAG, "Data user di-load (local only)");
     }
 
+    // Logout hanya hapus sharedprefs
     private void doLogout() {
-        SharedPreferences prefs = requireActivity().getSharedPreferences("USER_PREFS", Context.MODE_PRIVATE);
-        prefs.edit().clear().apply();
+        SharedPreferences prefs =
+                requireActivity().getSharedPreferences("USER_PREFS", Context.MODE_PRIVATE);
 
-        mAuth.signOut();
+        prefs.edit().clear().apply();
 
         Toast.makeText(requireContext(), "Berhasil Logout", Toast.LENGTH_SHORT).show();
 
