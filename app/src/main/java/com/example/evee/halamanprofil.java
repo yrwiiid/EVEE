@@ -95,7 +95,7 @@ public class halamanprofil extends Fragment {
         // Contoh ambil dari SharedPreferences sementara
 
         SharedPreferences prefs = requireActivity()
-                .getSharedPreferences("USER_PREFS", Context.MODE_PRIVATE);
+                .getSharedPreferences("USER_PREF", Context.MODE_PRIVATE);
 
         String nama = prefs.getString("nama", "Nama User");
         String username = prefs.getString("username", "username");
@@ -108,10 +108,9 @@ public class halamanprofil extends Fragment {
 
     // Logout hanya hapus sharedprefs
     private void doLogout() {
-        SharedPreferences prefs =
-                requireActivity().getSharedPreferences("USER_PREFS", Context.MODE_PRIVATE);
 
-        prefs.edit().clear().apply();
+        SessionManager session = new SessionManager(requireActivity());
+        session.clearSession();
 
         Toast.makeText(requireContext(), "Berhasil Logout", Toast.LENGTH_SHORT).show();
 
@@ -119,4 +118,5 @@ public class halamanprofil extends Fragment {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
     }
+
 }
