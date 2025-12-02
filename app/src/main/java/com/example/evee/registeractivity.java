@@ -1,8 +1,6 @@
 package com.example.evee;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -13,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
-import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -21,8 +19,6 @@ import com.google.android.material.textfield.TextInputEditText;
 import org.json.JSONObject;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 
 public class registeractivity extends AppCompatActivity {
 
@@ -50,17 +46,28 @@ public class registeractivity extends AppCompatActivity {
     }
 
     private void registerUser() {
-
         String name = edtName.getText().toString().trim();
         String email = edtEmail.getText().toString().trim();
         String password = edtPassword.getText().toString().trim();
         String confirmPassword = edtConfirmPassword.getText().toString().trim();
 
-        // Validasi
-        if (TextUtils.isEmpty(name)) { edtName.setError("Nama harus diisi"); return; }
-        if (TextUtils.isEmpty(email)) { edtEmail.setError("Email harus diisi"); return; }
-        if (TextUtils.isEmpty(password)) { edtPassword.setError("Password harus diisi"); return; }
-        if (!password.equals(confirmPassword)) { edtConfirmPassword.setError("Password tidak sama"); return; }
+        // Validasi input
+        if (TextUtils.isEmpty(name)) {
+            edtName.setError("Nama harus diisi");
+            return;
+        }
+        if (TextUtils.isEmpty(email)) {
+            edtEmail.setError("Email harus diisi");
+            return;
+        }
+        if (TextUtils.isEmpty(password)) {
+            edtPassword.setError("Password harus diisi");
+            return;
+        }
+        if (!password.equals(confirmPassword)) {
+            edtConfirmPassword.setError("Password tidak sama");
+            return;
+        }
 
         String url = ApiConfig.REGISTER_URL;
         Log.e("REGISTER_DEBUG", "API URL = " + url);
@@ -71,32 +78,37 @@ public class registeractivity extends AppCompatActivity {
             body.put("name", name);
             body.put("email", email);
             body.put("password", password);
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        Log.e("REGISTER_DEBUG", "JSON Body = " + body.toString());
-
-        StringRequest request = new StringRequest(Request.Method.POST, url,
+        // Gunakan JsonObjectRequest
+        JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.POST,
+                url,
+                body,
                 response -> {
-                    Log.e("REGISTER_DEBUG", "Response = " + response);
-
+                    Log.e("REGISTER_DEBUG", "Response = " + response.toString());
                     try {
-                        JSONObject obj = new JSONObject(response);
-                        if (obj.getBoolean("success")) {
+                        if (response.getBoolean("success")) {
+                            JSONObject userObj = response.getJSONObject("user");
 
-                            JSONObject userObj = obj.getJSONObject("user");
-
-                            SharedPreferences sp = getSharedPreferences("USER_PREF", Context.MODE_PRIVATE);
-                            SharedPreferences.Editor editor = sp.edit();
-                            editor.putString("id", userObj.getString("id"));
-                            editor.putString("name", userObj.getString("name"));
-                            editor.putString("email", userObj.getString("email"));
-                            editor.apply();
+                            // Simpan user ke SessionManager
+                            SessionManager sessionManager = new SessionManager(this);
+                            sessionManager.saveUser(
+                                    userObj.getString("id"),
+                                    userObj.getString("name"),
+                                    userObj.getString("email")
+                            );
 
                             Toast.makeText(this, "Register berhasil!", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(registeractivity.this, loginactivity.class));
+
+                            // Arahkan ke MenstruasiActivity
+                            Intent intent = new Intent(registeractivity.this, MenstruasiActivity.class);
+                            startActivity(intent);
                             finish();
                         } else {
-                            Toast.makeText(this, obj.getString("error"), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, response.getString("error"), Toast.LENGTH_SHORT).show();
                         }
                     } catch (Exception e) {
                         Log.e("REGISTER_DEBUG", "JSON parse error: " + e.getMessage());
@@ -104,41 +116,16 @@ public class registeractivity extends AppCompatActivity {
                 },
                 error -> {
                     Log.e("REGISTER_DEBUG", "Volley Error = " + error.toString());
-
                     if (error.networkResponse != null) {
                         String err = new String(error.networkResponse.data, StandardCharsets.UTF_8);
                         Log.e("REGISTER_DEBUG", "HTTP CODE = " + error.networkResponse.statusCode);
                         Log.e("REGISTER_DEBUG", "Error Body = " + err);
-                    } else {
-                        Log.e("REGISTER_DEBUG", "Network Response NULL (masalah koneksi/ngrok)");
                     }
-
                     Toast.makeText(this, "Error koneksi", Toast.LENGTH_SHORT).show();
                 }
-        ) {
+        );
 
-            // SEND JSON BODY
-            @Override
-            public byte[] getBody() {
-                return body.toString().getBytes(StandardCharsets.UTF_8);
-            }
-
-            @Override
-            public String getBodyContentType() {
-                return "application/json; charset=utf-8";
-            }
-
-            // SEND JSON HEADERS
-            @Override
-            public Map<String, String> getHeaders() {
-                Map<String, String> headers = new HashMap<>();
-                headers.put("Content-Type", "application/json; charset=utf-8");
-                headers.put("Accept", "application/json");
-                return headers;
-            }
-        };
-
-        // FIX: Ngrok suka block retry → OFF
+        // Retry policy (ngrok kadang block retry)
         request.setRetryPolicy(new DefaultRetryPolicy(
                 20000,
                 0,

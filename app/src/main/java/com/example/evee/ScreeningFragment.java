@@ -1,6 +1,8 @@
 package com.example.evee;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,11 +11,22 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.content.Intent;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ScreeningFragment extends Fragment {
 
@@ -56,7 +69,6 @@ public class ScreeningFragment extends Fragment {
 
         btnNext.setOnClickListener(view -> {
 
-            // Pastikan user memilih jawaban
             int selectedId = radioGroup.getCheckedRadioButtonId();
             if (selectedId == -1) {
                 Toast.makeText(getContext(), "Pilih jawaban dulu ya", Toast.LENGTH_SHORT).show();
@@ -71,14 +83,7 @@ public class ScreeningFragment extends Fragment {
             if (index < questions.length) {
                 updateUI(txtQuestion, txtProgress, radioGroup);
             } else {
-                Toast.makeText(getContext(), "Skrining selesai!", Toast.LENGTH_LONG).show();
-
-                // Pindah ke Dashboard
-                Intent intent = new Intent(getActivity(), dashboard.class);
-                startActivity(intent);
-
-                // Tutup activity screening agar tidak kembali lagi
-                getActivity().finish();
+                submitScreening();
             }
         });
 
@@ -96,6 +101,82 @@ public class ScreeningFragment extends Fragment {
             rb.setText(choice);
             rb.setTextSize(16);
             radioGroup.addView(rb);
+        }
+    }
+
+    // ===========================================
+    //   KIRIM HASIL SCREENING KE API
+    // ===========================================
+    private void submitScreening() {
+
+        SessionManager session = new SessionManager(requireContext());
+        String userId = session.getUserId();
+
+        if (userId == null) {
+            Toast.makeText(getContext(), "Session hilang! Silakan login ulang", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+
+        String url = ApiConfig.SCREENING_URL;
+
+        try {
+            // Buat JSON
+            JSONObject body = new JSONObject();
+            body.put("user_id", userId);
+
+            JSONArray arr = new JSONArray();
+            for (int ans : answers) { arr.put(ans); }
+
+            body.put("answers", arr);
+
+            Log.e("SCREENING_DEBUG", "Body = " + body.toString());
+
+            StringRequest request = new StringRequest(
+                    Request.Method.POST, url,
+                    response -> {
+                        Log.e("SCREENING_DEBUG", "Response = " + response);
+
+                        Toast.makeText(getContext(), "Screening tersimpan!", Toast.LENGTH_LONG).show();
+
+                        // Pindah ke dashboard
+                        Intent intent = new Intent(getActivity(), dashboard.class);
+                        startActivity(intent);
+                        requireActivity().finish();
+                    },
+                    error -> {
+                        Toast.makeText(getContext(), "Gagal mengirim data!", Toast.LENGTH_SHORT).show();
+                        Log.e("SCREENING_DEBUG", "Error = " + error.toString());
+                    }
+            ) {
+                @Override
+                public byte[] getBody() {
+                    return body.toString().getBytes(StandardCharsets.UTF_8);
+                }
+
+                @Override
+                public String getBodyContentType() {
+                    return "application/json; charset=utf-8";
+                }
+
+                @Override
+                public Map<String, String> getHeaders() {
+                    Map<String, String> headers = new HashMap<>();
+                    headers.put("Content-Type", "application/json");
+                    return headers;
+                }
+            };
+
+            request.setRetryPolicy(new DefaultRetryPolicy(
+                    20000,
+                    0,
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+            ));
+
+            Volley.newRequestQueue(requireContext()).add(request);
+
+        } catch (Exception e) {
+            Log.e("SCREENING_DEBUG", "JSON ERROR = " + e.getMessage());
         }
     }
 }

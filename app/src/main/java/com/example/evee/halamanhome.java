@@ -1,7 +1,7 @@
 package com.example.evee;
 
 import android.os.Bundle;
-import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +14,15 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.android.volley.Request;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 
 public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSavedListener {
@@ -27,33 +33,7 @@ public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSaved
     private Button buttonEditMood;
     private Button buttonLogPeriod;
 
-    private final SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
-
-    private final int[] moodImages = {
-            R.drawable.bingung, R.drawable.semangat, R.drawable.cemas, R.drawable.lelah,
-            R.drawable.marah, R.drawable.senang, R.drawable.sedih, R.drawable.percayadiri,
-            R.drawable.bosan, R.drawable.senang10, R.drawable.senang11, R.drawable.senang12
-    };
-
-    private final String[] labels = {
-            "Bingung","Semangat","Cemas","Lelah","Marah","Senang",
-            "Sedih","Percaya Diri","Bosan","Manja","Ngantuk","Sedih Banget"
-    };
-
-    private final String[] moodComments = {
-            "Waduh, jangan bingung ya, tarik napas dulu~",
-            "Ayo semangat! Kamu pasti bisa!",
-            "Tenang, cemasnya hilang kalau kita senyum :)",
-            "Lelah ya? Yuk istirahat sebentar~",
-            "Ups, marah-marah nggak asik, yuk tarik napas!",
-            "Yeay, senangnya ketemu hari yang ceria!",
-            "Sedih ya? Peluk hangat buatmu 💛",
-            "Percaya diri dong! Kamu hebat kok!",
-            "Bosan? Yuk cari hal seru!",
-            "Manja boleh, tapi jangan lupa senyum ya~",
-            "Ngantuk? Tidur sebentar biar segar lagi!",
-            "Sedih banget? Tenang, semuanya akan baik-baik saja!"
-    };
+    private SessionManager sessionManager;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -74,22 +54,20 @@ public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSaved
         buttonEditMood = view.findViewById(R.id.buttonEditMood);
         buttonLogPeriod = view.findViewById(R.id.buttonLogPeriod);
 
-        // GREETING DEFAULT
-        textGreeting.setText("Halo pengguna!");
+        sessionManager = new SessionManager(requireContext());
 
         // SET TANGGAL
         String todayDate = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
                 .format(Calendar.getInstance().getTime());
         textDate.setText(todayDate);
 
-        // DATA SIKLUS (placeholder)
-        textCycle.setText("—");
-        textCycleStatus.setText("Belum ada data siklus");
-
-        // MOOD DEFAULT
-        textMoodDesc.setText("Belum ada mood");
-        textMoodComment.setText("Yuk, catat mood-mu hari ini!");
-        imageMoodIcon.setVisibility(View.GONE);
+        // Panggil API Dashboard
+        String userId = sessionManager.getUserId();
+        if (userId != null) {
+            loadDashboard(userId);
+        } else {
+            Toast.makeText(getContext(), "User belum login", Toast.LENGTH_SHORT).show();
+        }
 
         // TOMBOL BUKA KALENDER
         if (buttonLogPeriod != null) {
@@ -102,7 +80,7 @@ public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSaved
             });
         }
 
-        // POPUP EDIT MOOD
+        // POPUP EDIT MOOD (manual override)
         if (buttonEditMood != null) {
             buttonEditMood.setOnClickListener(v -> {
                 MoodUpdatePopup popup = new MoodUpdatePopup(getContext(), (moodLabel, moodEmoji) -> {
@@ -113,54 +91,61 @@ public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSaved
             });
         }
 
-        // POPUP OTOMATIS (dummy)
-        checkMoodTodayPopup();
-
         return view;
     }
 
-    // SIMULASI POPUP OTOMATIS
-    private void checkMoodTodayPopup() {
-        new Handler().postDelayed(() -> {
-            MoodPopup popup = new MoodPopup(getContext(), (moodLabel, moodEmoji) -> {
-                updateMoodUI(moodLabel);
-            });
-            popup.show();
-        }, 300);
+    private void loadDashboard(String userId) {
+        // user_id dikirim lewat query string
+        String url = ApiConfig.HOME_URL + "?user_id=" + userId;
+
+        JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.GET,   // <-- PENTING: pakai GET
+                url,
+                null,                 // body harus null untuk GET
+                response -> {
+                    try {
+                        if (response.getBoolean("success")) {
+                            JSONObject userObj = response.getJSONObject("user");
+                            JSONObject cycleObj = response.getJSONObject("cycle");
+
+                            textGreeting.setText("Halo, " + userObj.getString("name"));
+                            textCycle.setText(cycleObj.getInt("cycle_day") + " Hari");
+                            textCycleStatus.setText("Siklus saat ini : " + cycleObj.getString("today_phase"));
+
+                            if (!response.isNull("today_mood")) {
+                                JSONObject moodObj = response.getJSONObject("today_mood");
+                                textMoodDesc.setText(moodObj.getString("name"));
+                                textMoodComment.setText("Mood hari ini: " + moodObj.getString("mood_tag"));
+                            } else {
+                                textMoodDesc.setText("Belum ada mood");
+                                textMoodComment.setText("Yuk, catat mood-mu hari ini!");
+                            }
+                        } else if (response.has("needs_screening")) {
+                            Toast.makeText(getContext(), response.getString("message"), Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (Exception e) {
+                        Log.e("HOME_DEBUG", "JSON parse error: " + e.getMessage());
+                    }
+                },
+                error -> {
+                    Log.e("HOME_DEBUG", "Volley Error = " + error.toString());
+                    Toast.makeText(getContext(), "Error koneksi", Toast.LENGTH_SHORT).show();
+                }
+        );
+
+        Volley.newRequestQueue(requireContext()).add(request);
     }
 
-    // UPDATE UI MOOD
+
+    // UPDATE UI MOOD (manual override)
     private void updateMoodUI(String moodLabel) {
         textMoodDesc.setText(moodLabel);
-        textMoodComment.setText(getCommentForLabel(moodLabel));
-
-        int resId = getDrawableForLabel(moodLabel);
-        if (resId != 0) {
-            imageMoodIcon.setImageResource(resId);
-            imageMoodIcon.setVisibility(View.VISIBLE);
-        } else {
-            imageMoodIcon.setVisibility(View.GONE);
-        }
+        textMoodComment.setText("Mood hari ini: " + moodLabel);
+        imageMoodIcon.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void onMoodSaved(String moodLabel, String moodEmoji) {
         updateMoodUI(moodLabel);
-    }
-
-    private int getDrawableForLabel(String label) {
-        if (label == null) return 0;
-        for (int i = 0; i < labels.length; i++) {
-            if (label.equals(labels[i])) return moodImages[i];
-        }
-        return 0;
-    }
-
-    private String getCommentForLabel(String label) {
-        if (label == null) return "Yuk, catat mood-mu hari ini!";
-        for (int i = 0; i < labels.length; i++) {
-            if (label.equals(labels[i])) return moodComments[i];
-        }
-        return "Tetap semangat ya!";
     }
 }
