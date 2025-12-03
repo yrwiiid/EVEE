@@ -11,4 +11,7 @@ public class ApiConfig {
     public static final String NOTES_URL = BASE_URL + "activities.php";
     public static final String MOODS_URL = BASE_URL + "moods.php";
     public static final String MOODSLOG_URL = BASE_URL + "mood_logs.php";
+
+    public static final String MOOD_ICON_BASE_URL = "https://lemuel-unsatisfiable-empathetically.ngrok-free.dev/EVEE0.2/assets/img/moods/";
+
 }

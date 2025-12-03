@@ -25,6 +25,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
+import com.bumptech.glide.Glide;
+
+
 public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSavedListener {
 
     private TextView textGreeting, textDate, textCycle, textCycleStatus, textMoodDesc, textMoodComment;
@@ -79,19 +82,23 @@ public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSaved
                         .commit();
             });
         }
+        buttonEditMood.setOnClickListener(v -> {
+            MoodUpdatePopup popup = new MoodUpdatePopup(requireContext(), this);
+            popup.show();
+        });
 
         // POPUP EDIT MOOD
-        if (buttonEditMood != null) {
-            buttonEditMood.setOnClickListener(v -> {
-                MoodUpdatePopup popup = new MoodUpdatePopup(getContext(), (moodLabel, moodId, iconFile) -> {
-                    // update UI langsung
-                    updateMoodUI(moodLabel, iconFile);
-                    // simpan ke server
-                    saveMoodToServer(moodId, "");
-                });
-                popup.show();
-            });
-        }
+//        if (buttonEditMood != null) {
+//            buttonEditMood.setOnClickListener(v -> {
+//                MoodUpdatePopup popup = new MoodUpdatePopup(getContext(), (moodLabel, moodId, iconFile) -> {
+//                    // update UI langsung
+//                    updateMoodUI(moodLabel, iconFile);
+//                    // simpan ke server
+//                    saveMoodToServer(moodId, "");
+//                });
+//                popup.show();
+//            });
+//        }
 
         return view;
     }
@@ -111,7 +118,7 @@ public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSaved
                             textCycleStatus.setText("Belum ada data siklus");
                             textMoodDesc.setText("Belum ada mood");
                             textMoodComment.setText("Yuk, isi screening dulu!");
-                            imageMoodIcon.setImageResource(R.drawable.percayadiri);
+                            imageMoodIcon.setImageResource(R.drawable.normal);
                             return;
                         }
 
@@ -119,24 +126,39 @@ public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSaved
                             JSONObject userObj = response.getJSONObject("user");
                             JSONObject cycleObj = response.getJSONObject("cycle");
 
-                            textGreeting.setText("Halo, " + userObj.getString("name"));
-                            textCycle.setText(cycleObj.getInt("cycle_day") + " Hari");
-                            textCycleStatus.setText("Siklus saat ini : " + cycleObj.getString("today_phase")
-                                    + " (Range: " + cycleObj.getString("cycle_length_range") + ")");
+                            int cycleDay      = cycleObj.getInt("cycle_day");
+                            boolean isMens    = cycleObj.getBoolean("is_menstruating");
+                            int daysToNext    = cycleObj.getInt("days_to_next_period");
+                            String todayPhase = cycleObj.getString("today_phase");
+                            String rangeText  = cycleObj.getString("cycle_length_range");
+
+                            if (isMens) {
+                                // Lagi haid
+                                textCycle.setText("Menstruasi ke " + cycleDay + " Hari");
+                            } else {
+                                // Tidak haid → hitung mundur ke haid berikutnya
+                                textCycle.setText("Menstruasi dalam: " + daysToNext + " Hari");
+                            }
+
+                            textCycleStatus.setText(
+                                    "Siklus saat ini : " + todayPhase + " (Range: " + rangeText + ")"
+                            );
+
 
                             if (!response.isNull("today_mood")) {
                                 JSONObject moodObj = response.getJSONObject("today_mood");
                                 textMoodDesc.setText(moodObj.getString("name"));
                                 textMoodComment.setText("Mood hari ini: " + moodObj.getString("mood_tag"));
 
-                                String iconFile = moodObj.getString("icon");
-                                int resId = getMoodIconRes(iconFile);
+                                String iconFile = moodObj.optString("icon", "");
+                                int resId = getLocalMoodIcon(iconFile);
                                 imageMoodIcon.setImageResource(resId);
                                 imageMoodIcon.setVisibility(View.VISIBLE);
+
                             } else {
                                 textMoodDesc.setText("Belum ada mood");
                                 textMoodComment.setText("Yuk, catat mood-mu hari ini!");
-                                imageMoodIcon.setImageResource(R.drawable.percayadiri);
+                                imageMoodIcon.setImageResource(R.drawable.normal);
                             }
                         }
                     } catch (Exception e) {
@@ -197,7 +219,7 @@ public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSaved
             case "masc-capek.png": return R.drawable.lelah;
             case "m005.png": return R.drawable.bingung;
             case "masc-sensitif.png": return R.drawable.bosan;
-            default: return R.drawable.percayadiri;
+            default: return R.drawable.normal;
         }
     }
 
@@ -206,14 +228,38 @@ public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSaved
         textMoodDesc.setText(moodLabel);
         textMoodComment.setText("Mood hari ini: " + moodLabel);
 
-        int resId = getMoodIconRes(iconFile);
+        int resId = getLocalMoodIcon(iconFile);
         imageMoodIcon.setImageResource(resId);
         imageMoodIcon.setVisibility(View.VISIBLE);
+
     }
+
+
 
     @Override
     public void onMoodSaved(String moodLabel, String moodId, String iconFile) {
         updateMoodUI(moodLabel, iconFile);
         saveMoodToServer(moodId, "");
     }
+
+    private int getLocalMoodIcon(String iconFileName) {
+        if (iconFileName == null) {
+            return R.drawable.mascnormal;
+        }
+
+        String baseName = iconFileName;
+        int dotIndex = baseName.lastIndexOf('.');
+        if (dotIndex != -1) {
+            baseName = baseName.substring(0, dotIndex);
+        }
+
+        int resId = requireContext().getResources()
+                .getIdentifier(baseName, "drawable", requireContext().getPackageName());
+
+        if (resId == 0) {
+            resId = R.drawable.mascnormal;
+        }
+        return resId;
+    }
+
 }

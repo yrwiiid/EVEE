@@ -52,7 +52,7 @@ public class halamancalendar extends Fragment {
     private TextView textSelectedRange;
     private Button btnSave, btnDelete;
 
-    private final List<RangeData> savedRanges = new ArrayList<>();
+    public static List<RangeData> savedRanges = new ArrayList<>();
     private final List<CalendarDay> selectedRange = new ArrayList<>();
     private final SimpleDateFormat SDF = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
 
@@ -321,7 +321,7 @@ public class halamancalendar extends Fragment {
     // ======================================
     //  MODEL RANGE
     // ======================================
-    private static class RangeData {
+    public static class RangeData {
         String id;
         List<CalendarDay> range;
         RangeData(String id, List<CalendarDay> range) {
