@@ -1,116 +1,128 @@
 package com.example.evee;
 
-import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.os.Bundle;
 import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
+import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class MoodUpdatePopup {
+import androidx.annotation.NonNull;
+
+import com.android.volley.Request;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONObject;
+
+public class MoodUpdatePopup extends Dialog {
+
+    private Context context;
+    private OnMoodSavedListener listener;
+
+    private String selectedMoodId = null;
+    private String selectedMoodName = null;
+    private String selectedIconFile = null;
 
     public interface OnMoodSavedListener {
-        void onMoodSaved(String moodLabel, String moodEmoji);
+        void onMoodSaved(String moodLabel, String moodId, String iconFile);
     }
 
-    private final Context context;
-    private final OnMoodSavedListener listener;
-    private AlertDialog dialog;
-
-    // Array untuk icon drawable (sesuaikan dengan nama file di drawable)
-    private final int[] moodIcons = {
-            R.drawable.bingung,
-            R.drawable.semangat,
-            R.drawable.cemas,
-            R.drawable.lelah,
-            R.drawable.marah,
-            R.drawable.senang,
-            R.drawable.sedih,
-            R.drawable.percayadiri,
-            R.drawable.bosan,
-            R.drawable.senang10, // Senang
-            R.drawable.senang11, // Senang
-            R.drawable.senang12  // Senang
-    };
-
-    private final String[] labels = {
-            "Bingung","Semangat","Cemas","Lelah","Marah","Senang",
-            "Sedih","Percaya Diri","Bosan","Manja","Ngantuk","Sedih Banget"
-    };
-
-    public MoodUpdatePopup(Context c, OnMoodSavedListener l) {
-        this.context = c;
-        this.listener = l;
+    public MoodUpdatePopup(@NonNull Context context, OnMoodSavedListener listener) {
+        super(context);
+        this.context = context;
+        this.listener = listener;
     }
 
-    public void show() {
-        View view = LayoutInflater.from(context).inflate(R.layout.popup_mood_update, null);
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setView(view);
-        builder.setCancelable(false);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.popup_mood);
 
-        dialog = builder.create();
-        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        GridLayout gridMoodIcons = findViewById(R.id.gridMoodIcons);
+        TextView moodSelectedText = findViewById(R.id.moodSelectedText);
+        Button btnSaveMood = findViewById(R.id.btnSaveMood);
+        ImageView btnClose = findViewById(R.id.btnClose);
 
-        ImageView btnClose = view.findViewById(R.id.btnClose);
-        GridLayout gridMoodIcons = view.findViewById(R.id.gridMoodIcons);
-        TextView moodText = view.findViewById(R.id.moodSelectedText);
+        btnClose.setOnClickListener(v -> dismiss());
 
-        btnClose.setOnClickListener(v -> dialog.dismiss());
+        String url = ApiConfig.MOODS_URL;
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null,
+                response -> {
+                    try {
+                        for (int i = 0; i < response.length(); i++) {
+                            JSONObject moodObj = response.getJSONObject(i);
+                            String moodId = moodObj.getString("id");
+                            String moodName = moodObj.getString("name");
+                            String iconFile = moodObj.getString("icon");
 
-        // Tambahkan semua mood icons ke grid
-        for (int i = 0; i < moodIcons.length; i++) {
-            LinearLayout itemLayout = createMoodItem(i, moodText);
-            gridMoodIcons.addView(itemLayout);
-        }
+                            // Container untuk tiap item mood
+                            LinearLayout item = new LinearLayout(context);
+                            item.setOrientation(LinearLayout.VERTICAL);
+                            item.setGravity(Gravity.CENTER);
+                            item.setPadding(16, 16, 16, 16);
 
-        dialog.show();
-    }
+                            // Icon mood lebih besar
+                            ImageView icon = new ImageView(context);
+                            int sizeInDp = 120; // ukuran icon lebih besar
+                            int sizeInPx = (int) (sizeInDp * context.getResources().getDisplayMetrics().density);
+                            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(sizeInPx, sizeInPx);
+                            lp.setMargins(12, 12, 12, 12);
+                            icon.setLayoutParams(lp);
+                            icon.setAdjustViewBounds(true);
+                            icon.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                            icon.setImageResource(getMoodIconRes(iconFile));
 
-    private LinearLayout createMoodItem(int index, TextView moodText) {
-        LinearLayout layout = new LinearLayout(context);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setGravity(Gravity.CENTER);
-        layout.setPadding(10, 10, 10, 10);
+                            // Label mood
+                            TextView label = new TextView(context);
+                            label.setText(moodName);
+                            label.setGravity(Gravity.CENTER);
+                            label.setPadding(0, 8, 0, 0);
 
-        // Set ukuran untuk setiap item
-        GridLayout.LayoutParams params = new GridLayout.LayoutParams();
-        params.width = 0;
-        params.height = GridLayout.LayoutParams.WRAP_CONTENT;
-        params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f);
-        layout.setLayoutParams(params);
+                            item.addView(icon);
+                            item.addView(label);
 
-        // ImageView untuk icon mood
-        ImageView icon = new ImageView(context);
-        icon.setImageResource(moodIcons[index]);
-        LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(
-                (int) (80 * context.getResources().getDisplayMetrics().density),
-                (int) (80 * context.getResources().getDisplayMetrics().density)
+                            item.setOnClickListener(v -> {
+                                selectedMoodId = moodId;
+                                selectedMoodName = moodName;
+                                selectedIconFile = iconFile;
+                                moodSelectedText.setText("Mood dipilih: " + moodName);
+                            });
+
+                            gridMoodIcons.addView(item);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                },
+                error -> Toast.makeText(context, "Gagal load moods", Toast.LENGTH_SHORT).show()
         );
-        icon.setLayoutParams(iconParams);
-        icon.setScaleType(ImageView.ScaleType.FIT_CENTER);
 
-        // TextView untuk label
-        TextView label = new TextView(context);
-        label.setText(labels[index]);
-        label.setTextSize(12);
-        label.setGravity(Gravity.CENTER);
-        label.setPadding(0, 8, 0, 0);
+        Volley.newRequestQueue(context).add(request);
 
-        layout.addView(icon);
-        layout.addView(label);
-
-        // Click listener - LANGSUNG SIMPAN DAN TUTUP
-        layout.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onMoodSaved(labels[index], "😊");
+        btnSaveMood.setOnClickListener(v -> {
+            if (selectedMoodId != null) {
+                listener.onMoodSaved(selectedMoodName, selectedMoodId, selectedIconFile);
+                dismiss();
+            } else {
+                Toast.makeText(context, "Pilih mood dulu", Toast.LENGTH_SHORT).show();
             }
-            dialog.dismiss();
         });
+    }
 
-        return layout;
+    private int getMoodIconRes(String iconFileName) {
+        switch (iconFileName) {
+            case "masc-senang.png": return R.drawable.senang;
+            case "m002.png": return R.drawable.sedih;
+            case "masc-cemas.png": return R.drawable.cemas;
+            case "masc-capek.png": return R.drawable.lelah;
+            case "m005.png": return R.drawable.bingung;
+            case "masc-sensitif.png": return R.drawable.bosan;
+            default: return R.drawable.percayadiri;
+        }
     }
 }

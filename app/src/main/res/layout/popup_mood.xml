@@ -32,28 +32,27 @@
         app:layout_constraintEnd_toStartOf="@id/btnClose"
         android:layout_marginTop="10dp"/>
 
-    <!-- Grid Mood Icons -->
+    <!-- Grid Mood Icons dalam ScrollView -->
     <ScrollView
         android:id="@+id/moodScrollView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:maxHeight="350dp"
-        android:scrollbars="none"
-        android:layout_marginTop="20dp"
+        android:maxHeight="500dp"
+        android:fillViewport="true"
         app:layout_constraintTop_toBottomOf="@id/titleMood"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/moodSelectedText"
+        android:layout_marginTop="20dp">
 
         <GridLayout
             android:id="@+id/gridMoodIcons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:rowCount="4"
             android:columnCount="3"
-            android:alignmentMode="alignBounds"
+            android:alignmentMode="alignMargins"
             android:useDefaultMargins="true"
-            android:layout_gravity="center"
-            android:padding="10dp"/>
+            android:padding="16dp"/>
     </ScrollView>
 
     <!-- Teks pilihan -->

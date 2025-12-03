@@ -16,9 +16,9 @@ import androidx.fragment.app.Fragment;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
@@ -80,12 +80,14 @@ public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSaved
             });
         }
 
-        // POPUP EDIT MOOD (manual override)
+        // POPUP EDIT MOOD
         if (buttonEditMood != null) {
             buttonEditMood.setOnClickListener(v -> {
-                MoodUpdatePopup popup = new MoodUpdatePopup(getContext(), (moodLabel, moodEmoji) -> {
-                    updateMoodUI(moodLabel);
-                    Toast.makeText(getContext(), "Mood disimpan (lokal)", Toast.LENGTH_SHORT).show();
+                MoodUpdatePopup popup = new MoodUpdatePopup(getContext(), (moodLabel, moodId, iconFile) -> {
+                    // update UI langsung
+                    updateMoodUI(moodLabel, iconFile);
+                    // simpan ke server
+                    saveMoodToServer(moodId, "");
                 });
                 popup.show();
             });
@@ -104,12 +106,12 @@ public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSaved
                 response -> {
                     try {
                         if (response.has("needs_screening") && response.getBoolean("needs_screening")) {
-                            // User belum isi screening
                             textGreeting.setText("Halo, " + response.getJSONObject("user").getString("name"));
                             textCycle.setText("—");
                             textCycleStatus.setText("Belum ada data siklus");
                             textMoodDesc.setText("Belum ada mood");
                             textMoodComment.setText("Yuk, isi screening dulu!");
+                            imageMoodIcon.setImageResource(R.drawable.percayadiri);
                             return;
                         }
 
@@ -126,9 +128,15 @@ public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSaved
                                 JSONObject moodObj = response.getJSONObject("today_mood");
                                 textMoodDesc.setText(moodObj.getString("name"));
                                 textMoodComment.setText("Mood hari ini: " + moodObj.getString("mood_tag"));
+
+                                String iconFile = moodObj.getString("icon");
+                                int resId = getMoodIconRes(iconFile);
+                                imageMoodIcon.setImageResource(resId);
+                                imageMoodIcon.setVisibility(View.VISIBLE);
                             } else {
                                 textMoodDesc.setText("Belum ada mood");
                                 textMoodComment.setText("Yuk, catat mood-mu hari ini!");
+                                imageMoodIcon.setImageResource(R.drawable.percayadiri);
                             }
                         }
                     } catch (Exception e) {
@@ -144,16 +152,68 @@ public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSaved
         Volley.newRequestQueue(requireContext()).add(request);
     }
 
+    // Kirim mood ke API mood_logs.php
+    private void saveMoodToServer(String moodId, String note) {
+        String url = ApiConfig.MOODSLOG_URL; // pastikan nama file benar: mood_logs.php
 
-    // UPDATE UI MOOD (manual override)
-    private void updateMoodUI(String moodLabel) {
+        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
+                response -> {
+                    Toast.makeText(getContext(), "Mood berhasil disimpan", Toast.LENGTH_SHORT).show();
+                    loadDashboard(sessionManager.getUserId()); // refresh dashboard
+                },
+                error -> {
+                    Toast.makeText(getContext(), "Gagal simpan mood", Toast.LENGTH_SHORT).show();
+                    Log.e("MOOD_LOG", "Error: " + error.toString());
+                }
+        ) {
+            @Override
+            public byte[] getBody() {
+                try {
+                    JSONObject jsonBody = new JSONObject();
+                    jsonBody.put("user_id", sessionManager.getUserId());
+                    jsonBody.put("mood_id", moodId);
+                    jsonBody.put("note", note);
+                    return jsonBody.toString().getBytes("utf-8");
+                } catch (Exception e) {
+                    return null;
+                }
+            }
+
+            @Override
+            public String getBodyContentType() {
+                return "application/json; charset=utf-8";
+            }
+        };
+
+        Volley.newRequestQueue(requireContext()).add(postRequest);
+    }
+
+    // Mapping nama file dari DB ke drawable Android
+    private int getMoodIconRes(String iconFileName) {
+        switch (iconFileName) {
+            case "masc-senang.png": return R.drawable.senang;
+            case "m002.png": return R.drawable.sedih;
+            case "masc-cemas.png": return R.drawable.cemas;
+            case "masc-capek.png": return R.drawable.lelah;
+            case "m005.png": return R.drawable.bingung;
+            case "masc-sensitif.png": return R.drawable.bosan;
+            default: return R.drawable.percayadiri;
+        }
+    }
+
+    // UPDATE UI MOOD
+    private void updateMoodUI(String moodLabel, String iconFile) {
         textMoodDesc.setText(moodLabel);
         textMoodComment.setText("Mood hari ini: " + moodLabel);
+
+        int resId = getMoodIconRes(iconFile);
+        imageMoodIcon.setImageResource(resId);
         imageMoodIcon.setVisibility(View.VISIBLE);
     }
 
     @Override
-    public void onMoodSaved(String moodLabel, String moodEmoji) {
-        updateMoodUI(moodLabel);
+    public void onMoodSaved(String moodLabel, String moodId, String iconFile) {
+        updateMoodUI(moodLabel, iconFile);
+        saveMoodToServer(moodId, "");
     }
 }

@@ -9,4 +9,6 @@ public class ApiConfig {
     public static final String HOME_URL = BASE_URL + "home_dashboard.php";
     public static final String CALENDAR_URL = BASE_URL + "period_cycles.php";
     public static final String NOTES_URL = BASE_URL + "activities.php";
+    public static final String MOODS_URL = BASE_URL + "moods.php";
+    public static final String MOODSLOG_URL = BASE_URL + "mood_logs.php";
 }

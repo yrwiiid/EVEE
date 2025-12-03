@@ -2,6 +2,7 @@ package com.example.evee;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;   // tambahkan import ini
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -149,7 +150,7 @@ public class AddNote extends Fragment {
             body.put("description", "");           // opsional
             body.put("date", dateStr);             // WAJIB
             body.put("start_time", "13:00:00");    // WAJIB, format HH:mm:ss
-            body.put("end_time", "");
+            body.put("end_time", JSONObject.NULL); // kirim null, bukan string kosong
             body.put("category", "Pribadi");
             body.put("priority", "Sedang");
             body.put("status", "Belum");
@@ -160,10 +161,26 @@ public class AddNote extends Fragment {
                 ApiConfig.NOTES_URL,   // arahkan ke activities.php
                 body,
                 response -> {
+                    Log.d("ACTIVITIES", "Response: " + response.toString());
                     Toast.makeText(getContext(), "Aktivitas tersimpan ✅", Toast.LENGTH_SHORT).show();
                     edtNote.setText("");
-                },
-                error -> Toast.makeText(getContext(), "Gagal simpan aktivitas", Toast.LENGTH_SHORT).show()
+
+                    // balik ke fragment kalender
+                    requireActivity().getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.nav_host_fragment, new halamancalendar()) // ganti dengan fragment kalender kamu
+                            .commit();
+                }
+                ,
+                error -> {
+                    Toast.makeText(getContext(), "Gagal simpan aktivitas", Toast.LENGTH_SHORT).show();
+                    if (error.networkResponse != null) {
+                        Log.e("ACTIVITIES", "Code: " + error.networkResponse.statusCode);
+                        Log.e("ACTIVITIES", "Resp: " + new String(error.networkResponse.data));
+                    } else {
+                        Log.e("ACTIVITIES", "Volley error: " + error.toString());
+                    }
+                }
         );
 
         Volley.newRequestQueue(requireContext()).add(req);
