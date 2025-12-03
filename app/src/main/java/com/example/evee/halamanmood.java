@@ -1,24 +1,21 @@
 package com.example.evee;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -26,138 +23,94 @@ import java.util.Map;
 
 public class halamanmood extends Fragment {
 
-    private FirebaseAuth mAuth;
-    private FirebaseFirestore db;
-
-    private HorizontalScrollView emojiScroll;
-    private LinearLayout emojiContainer;
-    private TextView moodText, dateText;
-    private Button btnSimpan;
-    private MoodBarChartView barChartView;
-
-    private int selectedIndex = 4;
-    private String selectedMood = "Senang";
-
-    private final String[] emojis = {"😡", "😞", "😐", "🙂", "😊", "😃", "😆", "🤩", "😍", "😘", "😴", "😭"};
-    private final String[] moods = {"Marah", "Sedih", "Biasa", "Cukup Senang", "Senang", "Bahagia", "Lucu", "Excited", "Cinta", "Manja", "Ngantuk", "Sedih Banget"};
+    private TextView dateText;
+    private LinearLayout moodProgressContainer;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.halamanmood, container, false);
 
-        mAuth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
-
-        emojiScroll = view.findViewById(R.id.emojiScroll);
-        emojiContainer = view.findViewById(R.id.emojiContainer);
-        moodText = view.findViewById(R.id.moodText);
+        moodProgressContainer = view.findViewById(R.id.moodProgressContainer);
         dateText = view.findViewById(R.id.dateText);
-        btnSimpan = view.findViewById(R.id.btnSimpan);
-        barChartView = view.findViewById(R.id.barChartView);
 
-        // Tampilkan tanggal
         String currentDate = new SimpleDateFormat("EEEE, dd MMMM yyyy", new Locale("id", "ID")).format(new Date());
         dateText.setText(currentDate);
 
-        // Tambahkan emoji scroll
-        for (String e : emojis) {
-            TextView tv = new TextView(getContext());
-            tv.setText(e);
-            tv.setTextSize(32);
-            tv.setTextColor(Color.parseColor("#55000000"));
-            tv.setPadding(30, 0, 30, 0);
-            tv.setShadowLayer(12f, 0f, 6f, Color.argb(80,0,0,0));
-            tv.setElevation(10f);
-            tv.setLetterSpacing(0.05f);
-            tv.setLayerType(View.LAYER_TYPE_SOFTWARE,null);
-            emojiContainer.addView(tv);
-        }
-
-        emojiScroll.getViewTreeObserver().addOnScrollChangedListener(this::updateEmojiSizes);
-        emojiScroll.post(this::updateEmojiSizes);
-
-        btnSimpan.setOnClickListener(v -> saveMood(selectedMood));
-
         loadTodayMood();
-
-        // Grafik 6 mood terakhir user + emoji
-        float[] dataValues = {1, 4, 3, 6, 8, 5}; // skala 1-10
-        String[] dataLabels = {"Marah","Sedih","Biasa","Senang","Bahagia","Excited"};
-        String[] dataEmojis = {"😡","😞","😐","😊","😃","🤩"};
-
-        barChartView.setData(dataValues, dataLabels, dataEmojis);
 
         return view;
     }
 
-    private void updateEmojiSizes() {
-        int scrollX = emojiScroll.getScrollX();
-        int centerX = emojiScroll.getWidth()/2;
+    private void loadTodayMood() {
+        // Yg ini data dummy soale tanpa firestore
+        ArrayList<String> listMood = new ArrayList<>();
+        listMood.add("Senang");
+        listMood.add("Sedih");
+        listMood.add("Marah");
+        listMood.add("Semangat");
+        listMood.add("Bosan");
+        listMood.add("Bingung");
+        listMood.add("Percaya Diri");
+        listMood.add("Manja");
+        listMood.add("Ngantuk");
+        listMood.add("Cemas");
 
-        int closestIndex=0;
-        int closestDistance=Integer.MAX_VALUE;
 
-        for(int i=0;i<emojiContainer.getChildCount();i++){
-            TextView v=(TextView)emojiContainer.getChildAt(i);
-            int viewCenter=(v.getLeft()+v.getRight())/2;
-            int distance=Math.abs(centerX+scrollX-viewCenter);
-
-            float normalized=Math.min(distance,1000)/1000f;
-            float scale=(float)Math.pow(1-normalized,2.8);
-
-            float size=35+(scale*55);
-            int alpha=(int)(60+(scale*195));
-
-            float curveY=(float)Math.sin(normalized*Math.PI)*80;
-            float shadow=12f*(1+scale);
-
-            v.setShadowLayer(shadow,0f,6f,Color.argb((int)(100*scale),0,0,0));
-            v.setTranslationZ(scale*10);
-            v.setTextSize(size);
-            v.setTextColor(Color.argb(alpha,0,0,0));
-            v.setTranslationY(curveY);
-
-            if(distance<closestDistance){
-                closestDistance=distance;
-                closestIndex=i;
-            }
-        }
-
-        selectedIndex=closestIndex;
-        selectedMood=moods[selectedIndex];
-        moodText.setText(selectedMood);
+        showMoodProgress(listMood);
     }
 
-    private void saveMood(String mood){
-        String uid=mAuth.getCurrentUser()!=null?mAuth.getCurrentUser().getUid():null;
-        if(uid==null){
-            Toast.makeText(getContext(),"User belum login",Toast.LENGTH_SHORT).show();
-            return;
-        }
+    private void showMoodProgress(ArrayList<String> listMood) {
+        moodProgressContainer.removeAllViews();
 
-        String today=new SimpleDateFormat("dd-MM-yyyy",Locale.getDefault()).format(new Date());
-        Map<String,Object> moodData=new HashMap<>();
-        moodData.put("date",today);
-        moodData.put("mood",mood);
+        HashMap<String, Integer> counter = new HashMap<>();
+        for (String m : listMood) counter.put(m, counter.getOrDefault(m, 0) + 1);
 
-        DocumentReference docRef=db.collection("Users").document(uid).collection("Mood").document(today);
-        docRef.set(moodData)
-                .addOnSuccessListener(aVoid -> Toast.makeText(getContext(),"Mood disimpan: "+mood,Toast.LENGTH_SHORT).show())
-                .addOnFailureListener(e -> Toast.makeText(getContext(),"Gagal menyimpan: "+e.getMessage(),Toast.LENGTH_SHORT).show());
-    }
+        int total = listMood.size();
 
-    private void loadTodayMood(){
-        String uid=mAuth.getCurrentUser()!=null?mAuth.getCurrentUser().getUid():null;
-        if(uid==null) return;
+        ArrayList<Map.Entry<String, Integer>> sortedList = new ArrayList<>(counter.entrySet());
 
-        String today=new SimpleDateFormat("dd-MM-yyyy",Locale.getDefault()).format(new Date());
-        DocumentReference docRef=db.collection("Users").document(uid).collection("Mood").document(today);
-        docRef.get().addOnSuccessListener(documentSnapshot -> {
-            if(documentSnapshot.exists()){
-                String mood=documentSnapshot.getString("mood");
-                moodText.setText("Mood kamu: "+mood);
+        Collections.sort(sortedList, new Comparator<Map.Entry<String, Integer>>() {
+            @Override
+            public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
+                return o2.getValue() - o1.getValue(); // terbesar -> terkecil
             }
         });
+
+        for (Map.Entry<String, Integer> entry : sortedList) {
+            String mood = entry.getKey();
+            int count = entry.getValue();
+            int percent = Math.round((count * 100f) / total);
+
+            View item = LayoutInflater.from(getContext()).inflate(R.layout.item_mood_progress, moodProgressContainer, false);
+
+            ImageView emojiView = item.findViewById(R.id.imgMood);
+            TextView labelView = item.findViewById(R.id.txtMoodTitle);
+            ProgressBar progressBar = item.findViewById(R.id.progressMood);
+            TextView percentView = item.findViewById(R.id.txtPercent);
+
+            emojiView.setImageResource(getEmojiDrawable(mood));
+            labelView.setText(mood);
+            progressBar.setProgress(percent);
+            percentView.setText(percent + "%");
+
+            moodProgressContainer.addView(item);
+        }
+    }
+
+    private int getEmojiDrawable(String mood) {
+        switch (mood) {
+            case "Marah": return R.drawable.marah;
+            case "Sedih": return R.drawable.sedih;
+            case "Bingung": return R.drawable.bingung;
+            case "Semangat": return R.drawable.semangat;
+            case "Senang": return R.drawable.senang12;
+            case "Bosan": return R.drawable.bosan;
+            case "Percaya diri": return R.drawable.percayadiri;
+            case "Manja": return R.drawable.senang11;
+            case "Ngantuk": return R.drawable.senang10;
+            case "Cemas": return R.drawable.cemas;
+            default: return R.drawable.senang; // icon cadangan
+        }
     }
 }
