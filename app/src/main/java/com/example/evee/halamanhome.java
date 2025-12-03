@@ -95,22 +95,32 @@ public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSaved
     }
 
     private void loadDashboard(String userId) {
-        // user_id dikirim lewat query string
         String url = ApiConfig.HOME_URL + "?user_id=" + userId;
 
         JsonObjectRequest request = new JsonObjectRequest(
-                Request.Method.GET,   // <-- PENTING: pakai GET
+                Request.Method.GET,
                 url,
-                null,                 // body harus null untuk GET
+                null,
                 response -> {
                     try {
+                        if (response.has("needs_screening") && response.getBoolean("needs_screening")) {
+                            // User belum isi screening
+                            textGreeting.setText("Halo, " + response.getJSONObject("user").getString("name"));
+                            textCycle.setText("—");
+                            textCycleStatus.setText("Belum ada data siklus");
+                            textMoodDesc.setText("Belum ada mood");
+                            textMoodComment.setText("Yuk, isi screening dulu!");
+                            return;
+                        }
+
                         if (response.getBoolean("success")) {
                             JSONObject userObj = response.getJSONObject("user");
                             JSONObject cycleObj = response.getJSONObject("cycle");
 
                             textGreeting.setText("Halo, " + userObj.getString("name"));
                             textCycle.setText(cycleObj.getInt("cycle_day") + " Hari");
-                            textCycleStatus.setText("Siklus saat ini : " + cycleObj.getString("today_phase"));
+                            textCycleStatus.setText("Siklus saat ini : " + cycleObj.getString("today_phase")
+                                    + " (Range: " + cycleObj.getString("cycle_length_range") + ")");
 
                             if (!response.isNull("today_mood")) {
                                 JSONObject moodObj = response.getJSONObject("today_mood");
@@ -120,8 +130,6 @@ public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSaved
                                 textMoodDesc.setText("Belum ada mood");
                                 textMoodComment.setText("Yuk, catat mood-mu hari ini!");
                             }
-                        } else if (response.has("needs_screening")) {
-                            Toast.makeText(getContext(), response.getString("message"), Toast.LENGTH_SHORT).show();
                         }
                     } catch (Exception e) {
                         Log.e("HOME_DEBUG", "JSON parse error: " + e.getMessage());
