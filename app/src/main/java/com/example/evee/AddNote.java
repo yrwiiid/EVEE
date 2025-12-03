@@ -16,10 +16,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.SetOptions;
+import com.android.volley.Request;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -32,11 +33,8 @@ public class AddNote extends Fragment {
     EditText edtNote;
     Button btnSaveNote;
 
-    FirebaseAuth mAuth;
-    FirebaseFirestore db;
-
     Calendar selectedDateCalendar;
-    private final SimpleDateFormat SDF = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
+    private final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()); // format API
 
     @Nullable
     @Override
@@ -51,10 +49,7 @@ public class AddNote extends Fragment {
         edtNote = view.findViewById(R.id.edtNote);
         btnSaveNote = view.findViewById(R.id.btnSaveNote);
 
-        mAuth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
-
-        // =====> SET TANGGAL DEFAULT KE HARI INI <=====
+        // Default tanggal hari ini
         selectedDateCalendar = Calendar.getInstance();
         txtSelectedDate.setText(
                 new SimpleDateFormat("dd MMMM yyyy", new Locale("id"))
@@ -63,7 +58,7 @@ public class AddNote extends Fragment {
 
         generateMiniCalendar(inflater);
 
-        btnSaveNote.setOnClickListener(v -> saveNote());
+        btnSaveNote.setOnClickListener(v -> saveActivity());
 
         return view;
     }
@@ -128,43 +123,50 @@ public class AddNote extends Fragment {
         }
     }
 
-    private void saveNote(){
+    private void saveActivity(){
         if(selectedDateCalendar==null){
             Toast.makeText(requireContext(), "Pilih tanggal terlebih dahulu.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        String noteText = edtNote.getText().toString().trim();
-        if(noteText.isEmpty()){
-            Toast.makeText(requireContext(), "Catatan kosong.", Toast.LENGTH_SHORT).show();
+        String titleText = edtNote.getText().toString().trim();
+        if(titleText.isEmpty()){
+            Toast.makeText(requireContext(), "Judul aktivitas kosong.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        FirebaseUser user = mAuth.getCurrentUser();
-        if(user==null) return;
-
-        String uid = user.getUid();
         String dateStr = SDF.format(selectedDateCalendar.getTime());
-
-        db.collection("Users").document(uid).collection("notes")
-                .document(dateStr)
-                .set(new NoteModel(dateStr,noteText), SetOptions.merge())
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(requireContext(), "Catatan tersimpan ✅", Toast.LENGTH_SHORT).show();
-                    edtNote.setText("");
-                })
-                .addOnFailureListener(e -> Toast.makeText(requireContext(), "Gagal simpan: "+e.getMessage(), Toast.LENGTH_SHORT).show());
-    }
-
-    // Model note
-    public static class NoteModel{
-        String date;
-        String note;
-        public NoteModel(){}
-        public NoteModel(String date, String note){
-            this.date=date;
-            this.note=note;
+        String userId = new SessionManager(requireContext()).getUserId();
+        if(userId == null){
+            Toast.makeText(requireContext(), "User belum login", Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        JSONObject body = new JSONObject();
+        try {
+            body.put("user_id", userId);
+            body.put("title", titleText);          // WAJIB
+            body.put("description", "");           // opsional
+            body.put("date", dateStr);             // WAJIB
+            body.put("start_time", "13:00:00");    // WAJIB, format HH:mm:ss
+            body.put("end_time", "");
+            body.put("category", "Pribadi");
+            body.put("priority", "Sedang");
+            body.put("status", "Belum");
+        } catch (Exception e) { e.printStackTrace(); }
+
+        JsonObjectRequest req = new JsonObjectRequest(
+                Request.Method.POST,
+                ApiConfig.NOTES_URL,   // arahkan ke activities.php
+                body,
+                response -> {
+                    Toast.makeText(getContext(), "Aktivitas tersimpan ✅", Toast.LENGTH_SHORT).show();
+                    edtNote.setText("");
+                },
+                error -> Toast.makeText(getContext(), "Gagal simpan aktivitas", Toast.LENGTH_SHORT).show()
+        );
+
+        Volley.newRequestQueue(requireContext()).add(req);
     }
 
     private int dp(int value) {
