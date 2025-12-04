@@ -85,6 +85,7 @@ public class Halaman_Artikel extends Fragment {
                             JSONObject obj = response.getJSONObject(i);
 
                             artikelList.add(new ArtikelModel(
+                                    obj.getString("id"),          // ← ambil id artikel dari API
                                     obj.getString("title"),
                                     obj.getString("created_at"),
                                     obj.getString("image"),

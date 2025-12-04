@@ -63,11 +63,13 @@ public class SavedArtikelActivity extends AppCompatActivity {
                         for (int i = 0; i < response.length(); i++) {
                             JSONObject obj = response.getJSONObject(i);
 
+                            // Tambahkan artikel ke savedList
                             savedList.add(new ArtikelModel(
+                                    obj.getString("id"),          // ambil id artikel dari API
                                     obj.getString("title"),
                                     obj.optString("read_at", obj.optString("created_at")), // fallback
                                     obj.getString("image"),
-                                    obj.optString("link", "") // kalau API kirim link
+                                    obj.optString("link", "")
                             ));
                         }
                         adapter.notifyDataSetChanged();
