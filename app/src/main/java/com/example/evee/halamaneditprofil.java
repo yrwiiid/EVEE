@@ -13,6 +13,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.android.volley.Request;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONObject;
+
 public class halamaneditprofil extends Fragment {
 
     private EditText etNama, etEmail, etUsername;
@@ -50,10 +56,37 @@ public class halamaneditprofil extends Fragment {
             return;
         }
 
+        SessionManager sessionManager = new SessionManager(requireActivity());
+        String userId = sessionManager.getUserId();
 
-        Toast.makeText(requireContext(), "Data berhasil disimpan (lokal)!", Toast.LENGTH_SHORT).show();
+        try {
+            JSONObject body = new JSONObject();
+            body.put("id", userId);
+            body.put("name", nama);
+            body.put("email", email);
+            body.put("username", username);
 
-        // Kembali ke halaman profil
-        requireActivity().getSupportFragmentManager().popBackStack();
+            String url = ApiConfig.BASE_URL + "users.php";
+
+            JsonObjectRequest request = new JsonObjectRequest(
+                    Request.Method.POST,
+                    url,
+                    body,
+                    response -> {
+                        Toast.makeText(requireContext(), "Data berhasil disimpan ke server!", Toast.LENGTH_SHORT).show();
+                        requireActivity().getSupportFragmentManager().popBackStack();
+                    },
+                    error -> {
+                        Toast.makeText(requireContext(), "Gagal simpan data: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+            );
+
+            Volley.newRequestQueue(requireContext()).add(request);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(requireContext(), "Terjadi kesalahan saat menyiapkan data", Toast.LENGTH_SHORT).show();
+        }
     }
 }
+

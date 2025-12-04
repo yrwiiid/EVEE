@@ -18,6 +18,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.android.volley.Request;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONObject;
+
 public class halamanprofil extends Fragment {
 
     private static final String TAG = "HalamanProfil";
@@ -91,20 +97,39 @@ public class halamanprofil extends Fragment {
     //   GANTI DENGAN MYSQL NANTI
     // ====================================
     private void loadUserDataFromServer() {
-        // NANTI ambil dari server MySQL via HTTP
-        // Contoh ambil dari SharedPreferences sementara
+        SessionManager sessionManager = new SessionManager(requireActivity());
+        String userId = sessionManager.getUserId();
 
-        SharedPreferences prefs = requireActivity()
-                .getSharedPreferences("USER_PREF", Context.MODE_PRIVATE);
+        String url = ApiConfig.BASE_URL + "users.php?id=" + userId;
 
-        String nama = prefs.getString("nama", "Nama User");
-        String username = prefs.getString("username", "username");
+        JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.GET,
+                url,
+                null,
+                response -> {
+                    try {
+                        JSONObject userObj = response.getJSONObject("user");
 
-        tvNama.setText(nama);
-        tvUsername.setText(username);
+                        String nama = userObj.getString("name");
+                        String email = userObj.getString("email"); // ini sebagai "username"
 
-        Log.d(TAG, "Data user di-load (local only)");
+                        tvNama.setText(nama);
+                        tvUsername.setText(email);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Toast.makeText(requireContext(), "Gagal parsing data user", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    Log.e("HalamanProfil", "Gagal ambil data user: " + error.getMessage());
+                    Toast.makeText(requireContext(), "Gagal ambil data user", Toast.LENGTH_SHORT).show();
+                }
+        );
+
+        Volley.newRequestQueue(requireContext()).add(request);
     }
+
 
     // Logout hanya hapus sharedprefs
     private void doLogout() {
