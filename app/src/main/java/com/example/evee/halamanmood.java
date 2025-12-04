@@ -1,140 +1,135 @@
 package com.example.evee;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.android.volley.Request;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONObject;
+
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 public class halamanmood extends Fragment {
 
-    private HorizontalScrollView emojiScroll;
-    private LinearLayout emojiContainer;
-    private TextView moodText, dateText;
-    private Button btnSimpan;
-    private MoodBarChartView barChartView;
-
-    private int selectedIndex = 4;
-    private String selectedMood = "Senang";
-
-    private final String[] emojis =
-            {"😡","😞","😐","🙂","😊","😃","😆","🤩","😍","😘","😴","😭"};
-
-    private final String[] moods =
-            {"Marah","Sedih","Biasa","Cukup Senang","Senang",
-                    "Bahagia","Lucu","Excited","Cinta","Manja","Ngantuk","Sedih Banget"};
+    private TextView dateText;
+    private LinearLayout moodProgressContainer;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         View view = inflater.inflate(R.layout.halamanmood, container, false);
 
-        emojiScroll = view.findViewById(R.id.emojiScroll);
-        emojiContainer = view.findViewById(R.id.emojiContainer);
-        moodText = view.findViewById(R.id.moodText);
+        moodProgressContainer = view.findViewById(R.id.moodProgressContainer);
         dateText = view.findViewById(R.id.dateText);
-        btnSimpan = view.findViewById(R.id.btnSimpan);
-        barChartView = view.findViewById(R.id.barChartView);
 
-        // Tampilkan tanggal
-        String currentDate = new SimpleDateFormat(
-                "EEEE, dd MMMM yyyy",
-                new Locale("id","ID")
-        ).format(new Date());
+        String currentDate = new SimpleDateFormat("EEEE, dd MMMM yyyy", new Locale("id", "ID")).format(new Date());
         dateText.setText(currentDate);
 
-        // Tambahkan emoji
-        for (String e : emojis) {
-            TextView tv = new TextView(getContext());
-            tv.setText(e);
-            tv.setTextSize(32);
-            tv.setTextColor(Color.parseColor("#55000000"));
-            tv.setPadding(30, 0, 30, 0);
-            tv.setShadowLayer(12f, 0f, 6f, Color.argb(80,0,0,0));
-            emojiContainer.addView(tv);
-        }
-
-        emojiScroll.getViewTreeObserver().addOnScrollChangedListener(this::updateEmojiSizes);
-        emojiScroll.post(this::updateEmojiSizes);
-
-        btnSimpan.setOnClickListener(v -> saveMoodToServer(selectedMood));
-
-        // placeholder
-        loadMoodFromServer();
-
-        // contoh data untuk grafik
-        float[] dataValues = {1,4,3,6,8,5};
-        String[] dataLabels = {"Marah","Sedih","Biasa","Senang","Bahagia","Excited"};
-        String[] dataEmojis = {"😡","😞","😐","😊","😃","🤩"};
-
-        barChartView.setData(dataValues, dataLabels, dataEmojis);
+        loadTodayMood();
 
         return view;
     }
 
-    private void updateEmojiSizes() {
-        int scrollX = emojiScroll.getScrollX();
-        int centerX = emojiScroll.getWidth() / 2;
+    private void loadTodayMood() {
+        SessionManager sessionManager = new SessionManager(requireContext());
+        String userId = sessionManager.getUserId();
 
-        int closestIndex = 0;
-        int closestDistance = Integer.MAX_VALUE;
+        String url = ApiConfig.BASE_URL + "mood_logs.php?user_id=" + userId;
 
-        for (int i = 0; i < emojiContainer.getChildCount(); i++) {
-            TextView v = (TextView) emojiContainer.getChildAt(i);
-            int viewCenter = (v.getLeft() + v.getRight()) / 2;
-            int distance = Math.abs(centerX + scrollX - viewCenter);
+        JsonArrayRequest request = new JsonArrayRequest(
+                Request.Method.GET,
+                url,
+                null,
+                response -> {
+                    ArrayList<String> listMood = new ArrayList<>();
+                    try {
+                        for (int i = 0; i < response.length(); i++) {
+                            JSONObject obj = response.getJSONObject(i);
+                            String moodName = obj.optString("mood_name", "Netral");
+                            listMood.add(moodName); // cukup ambil mood_name
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    showMoodProgress(listMood);
+                },
+                error -> Toast.makeText(requireContext(), "Gagal load mood: " + error.getMessage(), Toast.LENGTH_SHORT).show()
+        );
 
-            float normalized = Math.min(distance, 1000) / 1000f;
-            float scale = (float) Math.pow(1 - normalized, 2.8);
+        Volley.newRequestQueue(requireContext()).add(request);
+    }
 
-            float size = 35 + (scale * 55);
-            int alpha = (int) (60 + (scale * 195));
+    private void showMoodProgress(ArrayList<String> listMood) {
+        moodProgressContainer.removeAllViews();
 
-            float curveY = (float) Math.sin(normalized * Math.PI) * 80;
-            float shadow = 12f * (1 + scale);
+        HashMap<String, Integer> counter = new HashMap<>();
+        for (String m : listMood) counter.put(m, counter.getOrDefault(m, 0) + 1);
 
-            v.setShadowLayer(shadow, 0f, 6f, Color.argb((int) (100 * scale), 0, 0, 0));
-            v.setTranslationZ(scale * 10);
-            v.setTextSize(size);
-            v.setTextColor(Color.argb(alpha, 0, 0, 0));
-            v.setTranslationY(curveY);
+        int total = listMood.size();
 
-            if (distance < closestDistance) {
-                closestDistance = distance;
-                closestIndex = i;
+        ArrayList<Map.Entry<String, Integer>> sortedList = new ArrayList<>(counter.entrySet());
+
+        Collections.sort(sortedList, new Comparator<Map.Entry<String, Integer>>() {
+            @Override
+            public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
+                return o2.getValue() - o1.getValue(); // terbesar -> terkecil
             }
+        });
+
+        for (Map.Entry<String, Integer> entry : sortedList) {
+            String moodName = entry.getKey();
+            int count = entry.getValue();
+            int percent = Math.round((count * 100f) / total);
+
+            View item = LayoutInflater.from(getContext())
+                    .inflate(R.layout.item_mood_progress, moodProgressContainer, false);
+
+            ImageView emojiView = item.findViewById(R.id.imgMood);
+            TextView labelView = item.findViewById(R.id.txtMoodTitle);
+            ProgressBar progressBar = item.findViewById(R.id.progressMood);
+            TextView percentView = item.findViewById(R.id.txtPercent);
+
+            labelView.setText(moodName);
+            progressBar.setProgress(percent);
+            percentView.setText(percent + "%");
+
+            // pakai hardcode mapping
+            int resId = getEmojiDrawable(moodName);
+            emojiView.setImageResource(resId);
+
+            moodProgressContainer.addView(item);
         }
-
-        selectedIndex = closestIndex;
-        selectedMood = moods[selectedIndex];
-        moodText.setText(selectedMood);
     }
 
-    // =============================
-    //   REPLACE DENGAN MYSQL NANTI
-    // =============================
-
-    private void saveMoodToServer(String mood) {
-        // nanti kirim POST ke PHP/MySQL
-        Toast.makeText(getContext(), "Mood disimpan: " + mood, Toast.LENGTH_SHORT).show();
-    }
-
-    private void loadMoodFromServer() {
-        // nanti GET ke server MySQL
-        // contoh sementara:
-        moodText.setText("Pilih mood hari ini");
+    // Hardcode mapping mood → drawable lokal
+    private int getEmojiDrawable(String mood) {
+        switch (mood) {
+            case "Sensitif": return R.drawable.marah;
+            case "Sedih": return R.drawable.sedih;
+            case "Netral": return R.drawable.bingung;
+            case "Capek": return R.drawable.lelah;
+            case "Senang": return R.drawable.senang12;
+            case "Cemas": return R.drawable.cemas;
+            default: return R.drawable.normal; // fallback
+        }
     }
 }

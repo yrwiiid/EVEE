@@ -66,6 +66,23 @@ public class halamanhome extends Fragment implements MoodUpdatePopup.OnMoodSaved
 
         sessionManager = new SessionManager(requireContext());
 
+        Button buttonLogPeriod = view.findViewById(R.id.buttonLogPeriod);
+
+        buttonLogPeriod.setOnClickListener(v -> {
+            // Kalau kalender berupa Fragment
+            Fragment calendarFragment = new halamancalendar(); // ganti dengan nama fragment kalender kamu
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.nav_host_fragment, calendarFragment) // sesuaikan container
+                    .addToBackStack(null)
+                    .commit();
+
+            // Kalau kalender berupa Activity, pakai Intent:
+            // Intent intent = new Intent(requireContext(), CalendarActivity.class);
+            // startActivity(intent);
+        });
+
+
         // Tanggal hari ini
         String todayDate = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
                 .format(Calendar.getInstance().getTime());

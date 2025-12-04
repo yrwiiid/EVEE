@@ -91,36 +91,7 @@
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"/>
 
-    <!-- Label Username -->
-    <TextView
-        android:id="@+id/tvUsername"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Username"
-        android:textColor="#000000"
-        android:textSize="14sp"
-        app:layout_constraintTop_toBottomOf="@id/etEmail"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"/>
 
-    <!-- Input Username -->
-    <EditText
-        android:id="@+id/etUsername"
-        android:layout_width="0dp"
-        android:layout_height="50dp"
-        android:hint="Masukkan Username"
-        android:padding="12dp"
-        android:textColor="#000000"
-        android:textColorHint="#999999"
-        android:background="@drawable/bg_edittext"
-        app:layout_constraintTop_toBottomOf="@id/tvUsername"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="32dp"/>
-
-    <!-- Tombol Simpan -->
     <Button
         android:id="@+id/btnSimpan"
         android:layout_width="0dp"
@@ -129,11 +100,12 @@
         android:textColor="#FFFFFF"
         android:textStyle="bold"
         android:backgroundTint="#8B0015"
-        app:layout_constraintTop_toBottomOf="@id/etUsername"
+        app:layout_constraintTop_toBottomOf="@id/etEmail"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginStart="40dp"
         android:layout_marginEnd="40dp"
         android:layout_marginTop="28dp"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

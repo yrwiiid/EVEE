@@ -38,7 +38,6 @@ public class halamaneditprofil extends Fragment {
 
         etNama = view.findViewById(R.id.etNama);
         etEmail = view.findViewById(R.id.etEmail);
-        etUsername = view.findViewById(R.id.etUsername);
         btnSimpan = view.findViewById(R.id.btnSimpan);
 
         btnSimpan.setOnClickListener(v -> simpanData());
@@ -49,9 +48,9 @@ public class halamaneditprofil extends Fragment {
     private void simpanData() {
         String nama = etNama.getText().toString().trim();
         String email = etEmail.getText().toString().trim();
-        String username = etUsername.getText().toString().trim();
 
-        if (TextUtils.isEmpty(nama) || TextUtils.isEmpty(email) || TextUtils.isEmpty(username)) {
+
+        if (TextUtils.isEmpty(nama) || TextUtils.isEmpty(email)) {
             Toast.makeText(requireContext(), "Semua data harus diisi!", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -64,7 +63,6 @@ public class halamaneditprofil extends Fragment {
             body.put("id", userId);
             body.put("name", nama);
             body.put("email", email);
-            body.put("username", username);
 
             String url = ApiConfig.BASE_URL + "users.php";
 

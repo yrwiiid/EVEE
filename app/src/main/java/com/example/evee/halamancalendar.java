@@ -36,15 +36,10 @@ import java.util.Locale;
 import java.util.UUID;
 
 /**
- * Halaman Calendar — versi lengkap terintegrasi API period_cycles:
- * - Load siklus (GET) dari ApiConfig.PERIOD_CYCLES_URL
- * - Simpan siklus (POST) ke ApiConfig.PERIOD_CYCLES_URL
- * - Hapus siklus hanya lokal (tidak ke server)
- *
- * Prasyarat:
- * - ApiConfig.PERIOD_CYCLES_URL terdefinisi
- * - SessionManager.getUserId() mengembalikan user_id
- * - AndroidManifest: <uses-permission android:name="android.permission.INTERNET" />
+ * Kalender haid:
+ * - Input tanggal satu per satu (toggle).
+ * - Simpan sebagai beberapa rentang berurutan (start_date–end_date).
+ * - API tidak perlu diubah: dipanggil per rentang.
  */
 public class halamancalendar extends Fragment {
 
@@ -52,9 +47,10 @@ public class halamancalendar extends Fragment {
     private TextView textSelectedRange;
     private Button btnSave, btnDelete;
 
-    public static List<RangeData> savedRanges = new ArrayList<>();
-    private final List<CalendarDay> selectedRange = new ArrayList<>();
-    private final SimpleDateFormat SDF = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
+    public static List<RangeData> savedRanges = new ArrayList<>(); // dari server
+    private final List<CalendarDay> selectedDates = new ArrayList<>(); // pilihan user per tanggal
+    private final SimpleDateFormat SDF_UI = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
+    private final SimpleDateFormat SDF_API = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
     private SessionManager sessionManager;
     private RequestQueue requestQueue;
@@ -84,60 +80,29 @@ public class halamancalendar extends Fragment {
         // Load siklus dari server (mengisi savedRanges dan dekorasi)
         loadCyclesFromServer();
 
-        // Interaksi kalender persis seperti versi lokal
+        // Input per tanggal: klik = toggle
         calendarView.setOnDateChangedListener((widget, date, selected) -> {
             if (!selected) return;
 
-            // Jika klik pada range tersimpan → pilih seluruh range
-            for (RangeData rangeData : savedRanges) {
-                if (rangeData.range.contains(date)) {
-                    selectedRange.clear();
-                    selectedRange.addAll(rangeData.range);
-                    textSelectedRange.setText("Haid: " +
-                            formatDate(selectedRange.get(0)) + " - " +
-                            formatDate(selectedRange.get(selectedRange.size() - 1)) +
-                            " (terpilih)");
-                    refreshSelectedRangeUI();
-                    return;
-                }
-            }
-
-            // Klik pertama → auto 5 hari
-            if (selectedRange.isEmpty()) {
-                Calendar cal = (Calendar) date.getCalendar().clone();
-                selectedRange.clear();
-                for (int i = 0; i < 5; i++) {
-                    selectedRange.add(CalendarDay.from((Calendar) cal.clone()));
-                    cal.add(Calendar.DAY_OF_MONTH, 1);
-                }
-                textSelectedRange.setText("Haid: " +
-                        formatDate(selectedRange.get(0)) + " - " +
-                        formatDate(selectedRange.get(selectedRange.size() - 1)));
-                refreshSelectedRangeUI();
-                return;
-            }
-
-            // Klik hari selanjutnya untuk extend range
-            CalendarDay lastDay = selectedRange.get(selectedRange.size() - 1);
-            Calendar nextCal = (Calendar) lastDay.getCalendar().clone();
-            nextCal.add(Calendar.DAY_OF_MONTH, 1);
-            CalendarDay nextValid = CalendarDay.from(nextCal);
-
-            if (date.equals(nextValid)) {
-                selectedRange.add(date);
-                textSelectedRange.setText("Haid: " +
-                        formatDate(selectedRange.get(0)) + " - " +
-                        formatDate(selectedRange.get(selectedRange.size() - 1)));
-                refreshSelectedRangeUI();
+            // Toggle tanggal
+            if (selectedDates.contains(date)) {
+                selectedDates.remove(date);
             } else {
-                Toast.makeText(requireContext(),
-                        "Klik tanggal setelah hari terakhir untuk melanjutkan.",
-                        Toast.LENGTH_SHORT).show();
+                selectedDates.add(date);
             }
+
+            // Urutkan tanggal (naik)
+            selectedDates.sort((d1, d2) -> d1.getDate().compareTo(d2.getDate()));
+
+            // Update label
+            updateSelectedLabel();
+
+            // Refresh dekorasi
+            refreshSelectedRangeUI();
         });
 
-        btnSave.setOnClickListener(v -> saveCycle());
-        btnDelete.setOnClickListener(v -> deleteSelectedRange());
+        btnSave.setOnClickListener(v -> saveCyclesGrouped());
+        btnDelete.setOnClickListener(v -> clearSelection());
 
         return view;
     }
@@ -161,7 +126,6 @@ public class halamancalendar extends Fragment {
                 response -> {
                     savedRanges.clear();
                     try {
-                        SimpleDateFormat sdfApi = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
                         for (int i = 0; i < response.length(); i++) {
                             JSONObject obj = response.getJSONObject(i);
 
@@ -171,10 +135,9 @@ public class halamancalendar extends Fragment {
 
                             Date dStart, dEnd;
                             try {
-                                dStart = sdfApi.parse(start);
-                                dEnd   = sdfApi.parse(end);
+                                dStart = SDF_API.parse(start);
+                                dEnd   = SDF_API.parse(end);
                             } catch (ParseException pe) {
-                                // Skip record yang tidak bisa di-parse
                                 continue;
                             }
 
@@ -206,117 +169,154 @@ public class halamancalendar extends Fragment {
     }
 
     // ======================================
-    //  SIMPAN DATA (POST ke API)
+    //  SIMPAN DATA (POST per rentang ke API)
     // ======================================
-    private void saveCycle() {
-        if (selectedRange.isEmpty()) {
-            Toast.makeText(requireContext(), "Pilih rentang tanggal dulu!", Toast.LENGTH_SHORT).show();
+    private void saveCyclesGrouped() {
+        if (selectedDates.isEmpty()) {
+            Toast.makeText(requireContext(), "Pilih tanggal haid dulu!", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        String startUi = formatDate(selectedRange.get(0));                 // dd-MM-yyyy
-        String endUi   = formatDate(selectedRange.get(selectedRange.size() - 1));
+        // Group tanggal berurutan jadi rentang
+        List<RangeData> grouped = groupContiguousDates(selectedDates);
 
-        String start = toApiDate(startUi);                                 // yyyy-MM-dd
-        String end   = toApiDate(endUi);
+        // Kirim tiap rentang ke server (API tetap: start_date & end_date)
+        for (RangeData rd : grouped) {
+            String startApi = toApiDate(rd.range.get(0));
+            String endApi;
 
-        JSONObject body = new JSONObject();
-        try {
-            body.put("user_id", sessionManager.getUserId());
-            body.put("start_date", start);
-            body.put("end_date", end);
-            body.put("cycle_length", 28);                    // default contoh
-            body.put("period_length", selectedRange.size()); // panjang range terpilih
-            body.put("note", "");
-        } catch (Exception e) { /* ignore */ }
+            if (rd.range.size() == 1) {
+                // kalau hanya 1 hari, end = start
+                endApi = startApi;
+            } else {
+                endApi = toApiDate(rd.range.get(rd.range.size() - 1));
+            }
 
-        JsonObjectRequest req = new JsonObjectRequest(
-                Request.Method.POST,
-                ApiConfig.CALENDAR_URL,
-                body,
-                response -> {
-                    Toast.makeText(getContext(), "Siklus berhasil disimpan ✓", Toast.LENGTH_SHORT).show();
-                    // Refresh dari server agar ID dan konsistensi terjaga
-                    loadCyclesFromServer();
-                    // Reset pilihan aktif
-                    selectedRange.clear();
-                    textSelectedRange.setText("Belum ada tanggal dipilih");
-                    refreshSelectedRangeUI();
-                },
-                error -> Toast.makeText(getContext(), "Gagal simpan siklus", Toast.LENGTH_SHORT).show()
-        );
 
-        requestQueue.add(req);
+            JSONObject body = new JSONObject();
+            try {
+                body.put("user_id", sessionManager.getUserId());
+                body.put("start_date", startApi);
+                body.put("end_date", endApi);
+                body.put("cycle_length", 28);                    // opsional default
+                body.put("period_length", rd.range.size());      // panjang periode (hari)
+                body.put("note", "");
+            } catch (Exception ignore) {}
+
+            JsonObjectRequest req = new JsonObjectRequest(
+                    Request.Method.POST,
+                    ApiConfig.CALENDAR_URL,
+                    body,
+                    response -> {
+                        // setelah salah satu rentang berhasil: refresh dekorasi dari server
+                        loadCyclesFromServer();
+                    },
+                    error -> Toast.makeText(getContext(), "Gagal simpan rentang", Toast.LENGTH_SHORT).show()
+            );
+
+            requestQueue.add(req);
+        }
+
+        Toast.makeText(getContext(), "Siklus tersimpan ✓", Toast.LENGTH_SHORT).show();
+
+        // Reset pilihan aktif
+        selectedDates.clear();
+        updateSelectedLabel();
+        refreshSelectedRangeUI();
+    }
+
+    // Grouping tanggal berurutan (gap 1 hari) menjadi beberapa rentang
+    private List<RangeData> groupContiguousDates(List<CalendarDay> dates) {
+        List<RangeData> result = new ArrayList<>();
+        if (dates.isEmpty()) return result;  // ← pakai () di sini
+
+        // Pastikan urut
+        List<CalendarDay> sorted = new ArrayList<>(dates);
+        sorted.sort((a, b) -> a.getDate().compareTo(b.getDate()));
+
+        List<CalendarDay> current = new ArrayList<>();
+        current.add(sorted.get(0));
+
+        for (int i = 1; i < sorted.size(); i++) {
+            CalendarDay prev = sorted.get(i - 1);
+            CalendarDay cur  = sorted.get(i);
+
+            if (isNextDay(prev, cur)) {
+                current.add(cur);
+            } else {
+                result.add(new RangeData(UUID.randomUUID().toString(), new ArrayList<>(current)));
+                current.clear();
+                current.add(cur);
+            }
+        }
+        result.add(new RangeData(UUID.randomUUID().toString(), new ArrayList<>(current)));
+        return result;
+    }
+
+
+    private boolean isNextDay(CalendarDay prev, CalendarDay cur) {
+        Calendar cal = (Calendar) prev.getCalendar().clone();
+        cal.add(Calendar.DAY_OF_MONTH, 1);
+        CalendarDay next = CalendarDay.from(cal);
+        return next.equals(cur);
     }
 
     // ======================================
-    //   HAPUS DATA (lokal saja, tidak ke server)
+    //   HAPUS PILIHAN (lokal saja)
     // ======================================
-    private void deleteSelectedRange() {
-
-        if (selectedRange.isEmpty()) {
-            Toast.makeText(requireContext(), "Pilih rentang yang akan dihapus!", Toast.LENGTH_SHORT).show();
+    private void clearSelection() {
+        if (selectedDates.isEmpty()) {
+            Toast.makeText(requireContext(), "Tidak ada tanggal dipilih.", Toast.LENGTH_SHORT).show();
             return;
         }
-
-        String start = formatDate(selectedRange.get(0));
-        String end = formatDate(selectedRange.get(selectedRange.size() - 1));
-
-        RangeData toRemove = null;
-
-        for (RangeData rd : savedRanges) {
-            if (formatDate(rd.range.get(0)).equals(start) &&
-                    formatDate(rd.range.get(rd.range.size() - 1)).equals(end)) {
-                toRemove = rd;
-                break;
-            }
-        }
-
-        if (toRemove != null) {
-            // Hapus lokal (dekorasi kalender dibersihkan)
-            savedRanges.remove(toRemove);
-            Toast.makeText(requireContext(), "Rentang berhasil dihapus (lokal) ✓", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(requireContext(), "Data tidak ditemukan.", Toast.LENGTH_SHORT).show();
-        }
-
-        selectedRange.clear();
-        textSelectedRange.setText("Belum ada tanggal dipilih");
+        selectedDates.clear();
+        updateSelectedLabel();
         refreshSelectedRangeUI();
+        Toast.makeText(requireContext(), "Pilihan dibersihkan ✓", Toast.LENGTH_SHORT).show();
     }
 
     // ======================================
     //  REFRESH UI
     // ======================================
     private void refreshSelectedRangeUI() {
-
         calendarView.removeDecorators();
 
-        // Dekorasi data tersimpan
+        // Dekorasi data tersimpan (dari server)
         for (RangeData rd : savedRanges) {
             calendarView.addDecorator(new RangeCircleDecorator(rd.range, requireContext()));
         }
 
-        // Dekorasi pilihan aktif
-        if (!selectedRange.isEmpty()) {
-            calendarView.addDecorator(new RangeCircleDecorator(selectedRange, requireContext()));
+        // Dekorasi pilihan aktif (tanggal-tanggal yang sedang dipilih)
+        if (!selectedDates.isEmpty()) {
+            calendarView.addDecorator(new RangeCircleDecorator(selectedDates, requireContext()));
+        }
+    }
+
+    private void updateSelectedLabel() {
+        if (selectedDates.isEmpty()) {
+            textSelectedRange.setText("Belum ada tanggal dipilih");
+        } else if (selectedDates.size() == 1) {
+            textSelectedRange.setText("Haid: " + formatDate(selectedDates.get(0)));
+        } else {
+            // tampilkan dari tanggal pertama ke terakhir
+            List<CalendarDay> sorted = new ArrayList<>(selectedDates);
+            sorted.sort((a, b) -> a.getDate().compareTo(b.getDate()));
+            textSelectedRange.setText(
+                    "Haid: " + formatDate(sorted.get(0)) + " - " + formatDate(sorted.get(sorted.size() - 1))
+            );
         }
     }
 
     private String formatDate(CalendarDay day) {
-        return SDF.format(day.getCalendar().getTime());
+        if (day == null || day.getCalendar() == null) return "";
+        return SDF_UI.format(day.getCalendar().getTime());
     }
 
-    private String toApiDate(String ddMMyyyy) {
-        try {
-            SimpleDateFormat in = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
-            SimpleDateFormat out = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            Date d = in.parse(ddMMyyyy);
-            return d != null ? out.format(d) : ddMMyyyy;
-        } catch (Exception e) {
-            return ddMMyyyy;
-        }
+    private String toApiDate(CalendarDay day) {
+        if (day == null || day.getCalendar() == null) return "";
+        return SDF_API.format(day.getCalendar().getTime());
     }
+
 
     // ======================================
     //  MODEL RANGE
