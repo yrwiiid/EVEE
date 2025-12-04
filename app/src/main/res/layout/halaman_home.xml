@@ -230,65 +230,14 @@
                     android:textColor="#3F001D"
                     android:layout_marginBottom="12dp"/>
 
+                <!-- ✅ wadah dinamis -->
                 <LinearLayout
+                    android:id="@+id/layoutUpcomingActivities"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="8dp">
+                    android:orientation="vertical"
+                    android:layout_marginBottom="12dp"/>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="25 Agustus 2025"
-                        android:textSize="14sp"
-                        android:textColor="#850E35"
-                        android:layout_marginEnd="12dp"
-                        android:minWidth="100dp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Penilaian tugas akhir kuliah"
-                        android:textSize="14sp"
-                        android:textColor="#3F001D"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="12dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="27 Agustus 2025"
-                        android:textSize="14sp"
-                        android:textColor="#850E35"
-                        android:layout_marginEnd="12dp"
-                        android:minWidth="100dp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Rapat progress company organisasi"
-                        android:textSize="14sp"
-                        android:textColor="#3F001D"/>
-                </LinearLayout>
-
-                <Button
-                    android:id="@+id/buttonSeeReminder"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Lihat Remainder"
-                    android:textColor="#FFFFFF"
-                    android:backgroundTint="#850E35"
-                    android:minHeight="0dp"
-                    android:paddingStart="24dp"
-                    android:paddingEnd="24dp"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
-                    android:layout_gravity="center_horizontal"/>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
@@ -316,110 +265,69 @@
                     android:textColor="#3F001D"
                     android:layout_marginBottom="12dp"/>
 
+                <!-- Rata-rata siklus haid -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
+                    android:orientation="vertical"
                     android:paddingBottom="8dp"
                     android:paddingTop="8dp">
 
                     <TextView
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:text="Rata-rata siklus haid"
                         android:textSize="14sp"
                         android:textColor="#3F001D"/>
+
                     <TextView
+                        android:id="@+id/textAvgCycleLength"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="28 hari"
+                        android:text="—"
                         android:textSize="14sp"
-                        android:textColor="#3F001D"
-                        android:layout_marginEnd="8dp"/>
+                        android:textColor="#3F001D"/>
+
                     <TextView
+                        android:id="@+id/textCycleStatusLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Normal"
+                        android:text="—"
                         android:textSize="14sp"
                         android:textColor="#5CB85C"/>
+
                     <ImageView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:src="@drawable/ic_check_circle"
-                        android:layout_marginStart="4dp"
-                        android:contentDescription="Normal"/>
+                        android:layout_marginTop="4dp"
+                        android:contentDescription="Status"/>
                 </LinearLayout>
 
+                <!-- Rata-rata durasi periode haid -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical" android:paddingBottom="8dp"
+                    android:orientation="vertical"
+                    android:paddingBottom="8dp"
                     android:paddingTop="8dp">
 
                     <TextView
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Rata-rata siklus haid"
-                        android:textSize="14sp"
-                        android:textColor="#3F001D"
-                        android:layout_gravity="center_vertical"/> <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="28 hari"
-                    android:textSize="14sp"
-                    android:textColor="#3F001D"
-                    android:layout_marginEnd="8dp"
-                    android:layout_gravity="center_vertical"/> <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Normal"
-                    android:textSize="14sp"
-                    android:textColor="#5CB85C"
-                    android:layout_gravity="center_vertical"/> <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_check_circle"
-                    android:layout_marginStart="4dp"
-                    android:layout_gravity="center_vertical" android:contentDescription="Normal"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical" android:paddingBottom="8dp"
-                    android:paddingTop="8dp">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:text="Rata-rata durasi periode haid"
                         android:textSize="14sp"
-                        android:textColor="#3F001D"
-                        android:layout_gravity="center_vertical"/> <TextView
+                        android:textColor="#3F001D"/>
+
+                    <TextView
+                        android:id="@+id/textAvgPeriodLength"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="8 hari"
+                        android:text="—"
                         android:textSize="14sp"
-                        android:textColor="#3F001D"
-                        android:layout_marginEnd="8dp"
-                        android:layout_gravity="center_vertical"/> <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Normal"
-                        android:textSize="14sp"
-                        android:textColor="#5CB85C"
-                        android:layout_gravity="center_vertical"/> <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/ic_check_circle"
-                        android:layout_marginStart="4dp"
-                        android:layout_gravity="center_vertical" android:contentDescription="Normal"/>
+                        android:textColor="#3F001D"/>
                 </LinearLayout>
+
                 <Button
                     android:id="@+id/buttonEditCycle"
                     android:layout_width="wrap_content"
@@ -427,11 +335,6 @@
                     android:text="Edit Siklus"
                     android:textColor="#FFFFFF"
                     android:backgroundTint="#850E35"
-                    android:minHeight="0dp"
-                    android:paddingStart="24dp"
-                    android:paddingEnd="24dp"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="12dp"/>
             </LinearLayout>

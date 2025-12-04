@@ -4,16 +4,19 @@ import java.io.Serializable;
 
 public class ArtikelModel implements Serializable {
     private String judul;
-    private String hariUpload;
-    private int gambar;
+    private String tanggal;
+    private String gambarUrl;
+    private String link;
 
-    public ArtikelModel(String judul, String hariUpload, int gambar) {
+    public ArtikelModel(String judul, String tanggal, String gambarUrl, String link) {
         this.judul = judul;
-        this.hariUpload = hariUpload;
-        this.gambar = gambar;
+        this.tanggal = tanggal;
+        this.gambarUrl = gambarUrl;
+        this.link = link;
     }
 
     public String getJudul() { return judul; }
-    public String getHariUpload() { return hariUpload; }
-    public int getGambar() { return gambar; }
+    public String getTanggal() { return tanggal; }
+    public String getGambarUrl() { return gambarUrl; }
+    public String getLink() { return link; }
 }
