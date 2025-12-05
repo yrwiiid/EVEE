@@ -42,7 +42,7 @@ public class ScreeningFragment extends Fragment {
     };
 
     private String[][] choices = {
-            {"Dibawah 18 tahun", "18-24 tahun", "25-34 tqhun", "35-44 tahun", "45 tahun keatas"},
+            {"Dibawah 18 tahun", "18-24 tahun", "25-34 tahun", "35-44 tahun", "45 tahun keatas"},
             {"Dalam 7 hari terakhir", "Sekitar 1–2 minggu yang lalu", "Sekitar 3–4 minggu yang lalu", "Saya tidak ingat pasti"},
             {"Kurang dari 3 hari", "3–5 hari", "6–7 hari", "Lebih dari 7 hari"},
             {"<25 hari", "25-30 hari ", "<30 hari", "Tidak pasti"},

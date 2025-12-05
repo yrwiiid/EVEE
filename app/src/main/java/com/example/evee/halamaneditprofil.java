@@ -21,12 +21,8 @@ import org.json.JSONObject;
 
 public class halamaneditprofil extends Fragment {
 
-    private EditText etNama, etEmail, etUsername;
+    private EditText etNama, etEmail;
     private Button btnSimpan;
-
-    public halamaneditprofil() {
-        // konstruktor kosong wajib
-    }
 
     @Nullable
     @Override
@@ -48,7 +44,6 @@ public class halamaneditprofil extends Fragment {
     private void simpanData() {
         String nama = etNama.getText().toString().trim();
         String email = etEmail.getText().toString().trim();
-
 
         if (TextUtils.isEmpty(nama) || TextUtils.isEmpty(email)) {
             Toast.makeText(requireContext(), "Semua data harus diisi!", Toast.LENGTH_SHORT).show();
@@ -75,7 +70,14 @@ public class halamaneditprofil extends Fragment {
                         requireActivity().getSupportFragmentManager().popBackStack();
                     },
                     error -> {
-                        Toast.makeText(requireContext(), "Gagal simpan data: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                        String msg = "Gagal simpan data";
+                        if (error.networkResponse != null) {
+                            msg += " (status: " + error.networkResponse.statusCode + ")";
+                            if (error.networkResponse.data != null) {
+                                msg += " | " + new String(error.networkResponse.data);
+                            }
+                        }
+                        Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show();
                     }
             );
 
@@ -87,4 +89,3 @@ public class halamaneditprofil extends Fragment {
         }
     }
 }
-
